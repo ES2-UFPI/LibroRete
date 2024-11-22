@@ -25,7 +25,7 @@ services:
         until nc -z db 3306; do
           sleep 1;
         done;
-        python backend/app/manage.py runserver 0.0.0.0:8000;
+        python backend/librorete-project/manage.py runserver 0.0.0.0:8000;
       "
 
   frontend:
