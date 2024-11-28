@@ -1,0 +1,86 @@
+.ListItem {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  color: #8a726a;
+  gap: 20px;
+  background-color: #faf7f4;
+}
+
+.about {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 50px;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.info-list h3 {
+  overflow-wrap: break-word;
+}
+
+.description p {
+  max-width: 320px;
+  overflow-wrap: break-word;
+}
+
+.title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 15px;
+}
+
+.title p {
+  padding: 3px 5px;
+  border-radius: 5px;
+  background-color: #f2eae0;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.button {
+  padding: 5px;
+  border-radius: 50%;
+  background-color: #f2eae0;
+}
+
+.books {
+  padding-left: 20px;
+}
+
+@media (max-width: 550px) {
+  .description p {
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .about {
+    gap: 20px;
+  }
+
+  .title h3 {
+    font-size: 1rem;
+  }
+
+  .description p {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 350px) {
+  .about {
+    gap: 20px;
+  }
+}

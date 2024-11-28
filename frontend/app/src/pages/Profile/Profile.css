@@ -2,9 +2,9 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  gap: 70px;
   margin: 30px 10px 10px 10px;
   border-bottom: 2px solid #cbc5d1;
+  gap: 60px;
 }
 
 .details-container {
@@ -42,17 +42,18 @@
 }
 
 .ProfileContent {
+  max-width: 600px;
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 10px;
+  margin: 0px 10px;
+  gap: 30px;
 }
 
 .bar {
   display: flex;
   flex-direction: row;
-  align-self: flex-start;
+  align-self: center;
   gap: 40px;
 }
 
@@ -64,11 +65,18 @@
   font-size: 0.8rem;
 }
 
-.posts {
-  margin: auto 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.bar a {
+  color: black;
+  text-decoration: none;
+}
+
+.bar a:hover,
+.bar a.active {
+  color: #8a726a;
+}
+
+.profile-content {
+  width: 100%;
   color: #b5afa8;
 }
 
@@ -111,6 +119,6 @@
   }
 
   .bar {
-    gap: 30px;
+    gap: 25px;
   }
 }
