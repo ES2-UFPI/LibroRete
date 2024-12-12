@@ -1,0 +1,56 @@
+name: Testar com Docker Compose
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
+    - name: Install Docker Compose
+      run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+          pip install pytest coverage coveralls
+      continue-on-error: false
+
+    - name: Build and run Docker Compose (db)
+      run: |
+        docker-compose -f docker-compose.yml up -d db
+
+    - name: Build and run Docker Compose (backend)
+      run: |
+        docker-compose -f docker-compose.yml up -d backend
+
+    - name: Build and run Docker Compose (frontend)
+      run: |
+        docker-compose -f docker-compose.yml up -d frontend      
+
+    - name: Run tests inside the container
+      run: |
+        docker-compose exec backend bash -c "git config --global --add safe.directory /backend"
+        #cd backend/app; python manage.py test
+        #python /backend/app/manage.py test app
+        docker ps
+        #docker compose exec librorete_actions-backend-1 sh -c "ls -a;cd backend/app;coverage run --branch manage.py test tests;coverage xml;cat coverage.xml;pwd;ls;"
+        #docker compose exec backend sh -c "ls -a;cd backend/app;ls -a;pwd; python manage.py test tests -v 3"
+        docker exec librorete-backend-1 coverage run --branch backend/app/manage.py test tests
+        docker exec librorete-backend-1 ls -a
+        docker exec librorete-backend-1 coverage xml
+        docker exec librorete-backend-1 cat coverage.xml
+        #docker exec librorete-backend-1 coveralls
+      continue-on-error: false
+        
+        
+    - name: Shut down Docker Compose
+      run: docker-compose down

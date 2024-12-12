@@ -90,10 +90,19 @@ DATABASES = {
     'OPTIONS': {
             'charset': 'utf8mb4',
         },
-    } 
+    },
+    'TEST': {
+        'MIRROR': 'default',
+    },
 }
 
+import sys
 
+# settings.py
+if 'test' in sys.argv:
+    DATABASES['default']['TEST'] = {
+        'MIRROR': 'default',  # Use o banco de dados principal
+    }
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
