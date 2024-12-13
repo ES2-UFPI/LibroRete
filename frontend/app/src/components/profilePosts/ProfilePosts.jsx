@@ -1,7 +1,7 @@
 import React from 'react'
 
-const Posts = () => {
+const ProfilePosts = () => {
   return <h3>Não há publicações</h3>
 }
 
-export default Posts
+export default ProfilePosts

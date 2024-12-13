@@ -1,0 +1,40 @@
+.Feed {
+  flex: 1;
+  overflow-y: auto;
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  scrollbar-width: none;
+}
+
+.Feed::-webkit-scrollbar {
+  display: none;
+}
+
+.feed-nav {
+  align-self: flex-end;
+  width: fit-content;
+  padding: 5px 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  gap: 30px;
+  border-radius: 5px;
+  background-color: #faf7f4;
+}
+
+.feed-nav a {
+  align-items: center;
+  padding: 5px;
+  color: #8a726a;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.feed-nav a:hover,
+.feed-nav a.active {
+  background-color: #f2eae0;
+}

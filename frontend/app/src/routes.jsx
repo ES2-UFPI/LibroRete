@@ -11,13 +11,13 @@ import Comunidade from './pages/Comunidade/Comunidade'
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Feed />} />
-      <Route path="*" element={<Error />} />
+      <Route path="/*" element={<Feed />} />
       <Route path="/profile/*" element={<Profile />} />
       <Route path="/pesquisa" element={<Pesquisa />} />
       <Route path="/bate-papo" element={<BatePapo />} />
       <Route path="/cria-post" element={<CriaPost />} />
       <Route path="/comunidade" element={<Comunidade />} />
+      <Route path="*" element={<Error />} />
     </Routes>
   )
 }

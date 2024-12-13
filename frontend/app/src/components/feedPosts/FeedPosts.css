@@ -1,0 +1,24 @@
+.FeedPostsContent {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+  scrollbar-width: none;
+}
+
+.FeedPostsContent::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .FeedPostsContent {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 350px) {
+  .FeedPostsContent {
+    gap: 30px;
+  }
+}
