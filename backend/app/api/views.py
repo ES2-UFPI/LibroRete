@@ -30,30 +30,35 @@ def get_user(request, nick):
         usuario = mdl.Usuario.objects.get(username=nick)
         serializer = srl.UsuarioSerializer(usuario)
     return Response(serializer.data)
-  
+
 @api_view(['GET'])
 def get_user_lists(request, nick):
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("CALL busca_listas_de_um_usuario(%s)", [nick])
-            listas = cursor.fetchall()
+        usuario = mdl.Usuario.objects.get(username=nick)
+        perfil = mdl.Perfil.objects.get(id_usuario_perfil=usuario.id)
+        
+        # Busca todas as listas do usuário
+        listas = mdl.Lista.objects.filter(id_perfil_lista=perfil.id)
+        
+        result = []
+        for lista in listas:
+            # Pegar instancias de ListaLivro que possuem lista.id
+            listalivro = mdl.ListaLivro.objects.filter(id_lista=lista.id)
 
-            result = []
-            for lista in listas:
-                lista_nome = lista[0]
-                cursor.execute("CALL busca_livros_por_username(%s)", [nick])
-                livros = cursor.fetchall()
+            # Tabela virtual JOIN de ListaLivro e Livro
+            tabela_virtual = listalivro.select_related('isbn_livro')
 
-                livros_da_lista = []
-                for livro in livros:
-                    if livro[0] == lista_nome:
-                        livros_da_lista.append(livro[2])
-                
-                result.append({
-                    'lista': lista_nome,
-                    'livros': livros_da_lista
-                })
+            # Criar lista apenas com os títulos dos livros
+            livros_da_lista = tabela_virtual.values_list('isbn_livro__titulo', flat=True)
 
+            result.append({
+                'lista': lista.nome,
+                'livros': list(livros_da_lista)
+            })
+            
         return Response(result)
+        
+    except mdl.Usuario.DoesNotExist:
+        return Response({"message": "Usuário não encontrado"}, status=404)
     except Exception as e:
         return Response({"message": str(e)}, status=500)
