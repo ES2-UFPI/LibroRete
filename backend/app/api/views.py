@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from . import serializers as srl
 from . import models as mdl
-from django.db import connection
+
 
 @api_view(['GET'])
 def get_by_nick(request, nick):
@@ -12,10 +12,10 @@ def get_by_nick(request, nick):
     except:
         return Response({"message": "Usuário não encontrado"}, status=404)
     
-    if request.method == 'GET':
-        usuario = mdl.Usuario.objects.get(username=nick)
-        perfil = mdl.Perfil.objects.get(id_usuario_perfil=usuario.id)
-        serializer = srl.PerfilSerializer(perfil)
+    usuario = mdl.Usuario.objects.get(username=nick)
+    perfil = mdl.Perfil.objects.get(id_usuario_perfil=usuario.id)
+    serializer = srl.PerfilSerializer(perfil)
+
     return Response(serializer.data)
 
 
@@ -26,10 +26,11 @@ def get_user(request, nick):
     except:
         return Response({"message": "Usuário não encontrado"}, status=404)
 
-    if request.method == 'GET':
-        usuario = mdl.Usuario.objects.get(username=nick)
-        serializer = srl.UsuarioSerializer(usuario)
+    usuario = mdl.Usuario.objects.get(username=nick)
+    serializer = srl.UsuarioSerializer(usuario)
+
     return Response(serializer.data)
+
 
 @api_view(['GET'])
 def get_user_lists(request, nick):
