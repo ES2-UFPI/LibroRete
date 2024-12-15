@@ -106,7 +106,7 @@ INSERT IGNORE INTO post (id, conteudo, data_criacao, midia) VALUES
 (1, "amei esse livro gente :)", "2024/12/13 12:13:34", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1ailnDneVDYRN_d55CjsYSy0Vk_sxHyvK9g&s"),
 (2, "Quem já leu essa maravilha??", "2024/12/14 09:10:17", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB_geGRhJccyOA5-XTRH7U1wmae-1CGGaxww&s");
 
-INSERT INTO comentario (id, conteudo, data_criacao, id_comentario_pai, id_post) VALUES
+INSERT IGNORE INTO comentario (id, conteudo, data_criacao, id_comentario_pai, id_post) VALUES
 (1, "Tbm gostei miga", "2024/12/13 12:20:13", NULL, 1),
 (2, "Parabens pela ÓTIMAAAA escolha de livro 📚", "2024/12/13 13:45:06", NULL, 1),
 (3, "É muito bom né? kkk", "2024/12/13 12:30:42", 1, 1),
