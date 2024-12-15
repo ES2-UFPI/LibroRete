@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 import requests
+
 class APITests(TestCase):
     def test_usuario_endpoint(self):
         # Monta a URL completa

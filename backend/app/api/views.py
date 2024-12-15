@@ -1,8 +1,10 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 from . import serializers as srl
 from . import models as mdl
-from django.db import connection
+
 
 @api_view(['GET'])
 def get_by_nick(request, nick):
@@ -12,10 +14,10 @@ def get_by_nick(request, nick):
     except:
         return Response({"message": "Usuário não encontrado"}, status=404)
     
-    if request.method == 'GET':
-        usuario = mdl.Usuario.objects.get(username=nick)
-        perfil = mdl.Perfil.objects.get(id_usuario_perfil=usuario.id)
-        serializer = srl.PerfilSerializer(perfil)
+    usuario = mdl.Usuario.objects.get(username=nick)
+    perfil = mdl.Perfil.objects.get(id_usuario_perfil=usuario.id)
+    serializer = srl.PerfilSerializer(perfil)
+
     return Response(serializer.data)
 
 
@@ -26,10 +28,11 @@ def get_user(request, nick):
     except:
         return Response({"message": "Usuário não encontrado"}, status=404)
 
-    if request.method == 'GET':
-        usuario = mdl.Usuario.objects.get(username=nick)
-        serializer = srl.UsuarioSerializer(usuario)
+    usuario = mdl.Usuario.objects.get(username=nick)
+    serializer = srl.UsuarioSerializer(usuario)
+
     return Response(serializer.data)
+
 
 @api_view(['GET'])
 def get_user_lists(request, nick):
@@ -62,3 +65,53 @@ def get_user_lists(request, nick):
         return Response({"message": "Usuário não encontrado"}, status=404)
     except Exception as e:
         return Response({"message": str(e)}, status=500)
+
+@csrf_exempt # Decorador perigoso?
+@api_view(['POST'])
+def criar_interacao(request):
+    try:
+        # Obter dados do request
+        tipo = request.data.get('tipo')
+        id_usuario = request.data.get('id_usuario')
+        id_post = request.data.get('id_post')
+
+        # Criando e validando id da nova interacao
+        while True:
+            total_interacoes = mdl.Interacao.objects.count()
+            id_interacao = total_interacoes + 1
+            if not mdl.Interacao.objects.filter(id=id_interacao).exists():
+                break
+
+        data = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # Validar inexistência da interação
+        if mdl.Interacao.objects.filter(tipo=tipo,id_usuario=id_usuario,id_post=id_post).exists():
+            return Response({"erro": "Interação já existe"}, status=400)
+
+        # Validar tipo de interação
+        tipos_validos = ['curtir', 'comentar', 'visualizar']
+        if tipo not in tipos_validos:
+            return Response({"erro": f"Tipo de interação inválido. Tipos válidos: {tipos_validos}"},status=400)
+
+        # Validar existência do usuário
+        try:
+            usuario = mdl.Usuario.objects.get(id=id_usuario)
+        except mdl.Usuario.DoesNotExist:
+            return Response({"erro": "Usuário não encontrado"},status=404)
+
+        # Validar existência do post
+        try:
+            post = mdl.Post.objects.get(id=id_post)
+        except mdl.Post.DoesNotExist:
+            return Response({"erro": "Post não encontrado"},status=404)
+
+        # Criar nova interação
+        nova_interacao = mdl.Interacao(id=id_interacao,tipo=tipo,data_interacao=data,id_usuario=usuario,id_post=post)
+        nova_interacao.save()
+
+        # Serializar e retornar resposta
+        serializer = srl.InteracaoSerializer(nova_interacao)
+        return Response(serializer.data, status=201)
+
+    except Exception as e:
+        return Response({"erro": f"Erro ao criar interação: {str(e)}"},status=500)

@@ -77,6 +77,18 @@ class AuthUserUserPermissions(models.Model):
         unique_together = (('user', 'permission'),)
 
 
+class Comentario(models.Model):
+    id = models.IntegerField(primary_key=True)
+    conteudo = models.CharField(max_length=255)
+    data_criacao = models.DateTimeField()
+    id_comentario_pai = models.ForeignKey('self', models.DO_NOTHING, db_column='id_comentario_pai', blank=True, null=True)
+    id_post = models.ForeignKey('Post', models.DO_NOTHING, db_column='id_post')
+
+    class Meta:
+        managed = False
+        db_table = 'comentario'
+
+
 class DjangoAdminLog(models.Model):
     action_time = models.DateTimeField()
     object_id = models.TextField(blank=True, null=True)
@@ -122,6 +134,18 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
+class Interacao(models.Model):
+    id = models.IntegerField(primary_key=True)
+    tipo = models.CharField(max_length=50)
+    data_interacao = models.DateTimeField()
+    id_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='id_usuario')
+    id_post = models.ForeignKey('Post', models.DO_NOTHING, db_column='id_post')
+
+    class Meta:
+        managed = False
+        db_table = 'interacao'
+
+
 class Lista(models.Model):
     id = models.IntegerField(primary_key=True)
     nome = models.CharField(max_length=150)
@@ -162,6 +186,17 @@ class Perfil(models.Model):
     class Meta:
         managed = False
         db_table = 'perfil'
+
+
+class Post(models.Model):
+    id = models.IntegerField(primary_key=True)
+    conteudo = models.CharField(max_length=255)
+    data_criacao = models.DateTimeField()
+    midia = models.TextField()
+
+    class Meta:
+        managed = False
+        db_table = 'post'
 
 
 class Usuario(models.Model):
