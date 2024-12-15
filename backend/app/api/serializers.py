@@ -11,3 +11,8 @@ class PerfilSerializer(serializers.ModelSerializer):
     class Meta:
         model = mdl.Perfil
         fields = '__all__'
+
+class InteracaoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = mdl.Interacao
+        fields = ['id', 'tipo', 'data_interacao', 'id_usuario', 'id_post']
