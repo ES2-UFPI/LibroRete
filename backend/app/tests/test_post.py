@@ -5,8 +5,8 @@ from api.models import Usuario, Post, Interacao
 class PostTestCase(TestCase):
 
     def test_get_posts(self):
-        response = self.client.get("/api/posts")
-        self.assertEqual(response.status_code, 201)
+        response = self.client.get("/api/posts/")
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), [
     {
         "id": 1,
@@ -24,7 +24,7 @@ class PostTestCase(TestCase):
 
     def test_get_post(self):
         response = self.client.get("/api/posts/1")
-        self.assertEqual(response.status_code, 201) 
+        self.assertEqual(response.status_code, 200) 
         self.assertEqual(response.json(), {
     "id": 1,
     "conteudo": "amei esse livro gente :)",
@@ -34,7 +34,7 @@ class PostTestCase(TestCase):
     
     def test_get_post_interacoes(self):
         response = self.client.get("/api/posts/1/interacoes")
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), [
     {
         "id": 1,
