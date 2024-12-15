@@ -84,6 +84,10 @@ def criar_interacao(request):
 
         data = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
 
+        # Validar inexistência da interação
+        if mdl.Interacao.objects.filter(tipo=tipo,id_usuario=id_usuario,id_post=id_post).exists():
+            return Response({"erro": "Interação já existe"}, status=400)
+
         # Validar tipo de interação
         tipos_validos = ['curtir', 'comentar', 'visualizar']
         if tipo not in tipos_validos:
