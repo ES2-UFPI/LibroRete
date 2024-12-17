@@ -1,0 +1,84 @@
+.RecommendationsContent {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 15px;
+}
+
+.arrows {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.recommendations {
+  max-width: 752px;
+  padding: 20px;
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  align-items: stretch;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  background-color: #faf7f4;
+  border-radius: 10px;
+}
+
+.recommendations::-webkit-scrollbar {
+  height: 5px;
+}
+
+.recommendations::-webkit-scrollbar-track {
+  border-radius: 10px;
+}
+
+.recommendations::-webkit-scrollbar-thumb {
+  background-color: #8a726a;
+  border-radius: 10px;
+}
+
+.recommendations::-webkit-scrollbar-thumb:hover {
+  background-color: #61534e;
+}
+
+@media (max-width: 1100px) {
+  .recommendations {
+    max-width: 632px;
+  }
+}
+
+@media (max-width: 950px) {
+  .recommendations {
+    max-width: 496px;
+  }
+}
+
+@media (max-width: 580px) {
+  .recommendations {
+    max-width: 376px;
+  }
+}
+
+@media (max-width: 480px) {
+  .recommendations {
+    max-width: 236px;
+  }
+}
