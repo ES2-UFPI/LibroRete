@@ -39,16 +39,8 @@ jobs:
     - name: Run tests inside the container
       run: |
         docker-compose exec backend bash -c "git config --global --add safe.directory /backend"
-        #cd backend/app; python manage.py test
-        #python /backend/app/manage.py test app
-        docker ps
-        #docker compose exec librorete_actions-backend-1 sh -c "ls -a;cd backend/app;coverage run --branch manage.py test tests;coverage xml;cat coverage.xml;pwd;ls;"
-        #docker compose exec backend sh -c "ls -a;cd backend/app;ls -a;pwd; python manage.py test tests -v 3"
         docker exec librorete-backend-1 coverage run --branch backend/app/manage.py test tests
-        docker exec librorete-backend-1 ls -a
-        docker exec librorete-backend-1 coverage xml
-        docker exec librorete-backend-1 cat coverage.xml
-        #docker exec librorete-backend-1 coveralls
+
       continue-on-error: false
         
         
