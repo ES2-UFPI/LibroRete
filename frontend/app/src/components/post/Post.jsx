@@ -45,7 +45,7 @@ const Post = ({
         </div>
         <div className="text">
           <p id="user">{username}</p>
-          <p id="caption">{caption}</p>
+          <p id="caption-post">{caption}</p>
         </div>
       </div>
     </div>
