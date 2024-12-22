@@ -118,6 +118,7 @@ def create_interaction(request):
     except Exception as e:
         return Response({"erro": f"Erro ao criar interação: {str(e)}"},status=500)
 
+
 # http://localhost:8000/api/search_users/?nome=Maria&username=eduarda
 # http://localhost:8000/api/search_users/?nome=Mancini&username=mancini
 # http://localhost:8000/api/search_users/?email=eduarda@gmail.com
