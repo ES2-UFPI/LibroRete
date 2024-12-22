@@ -125,6 +125,7 @@ def create_interaction(request):
 # http://localhost:8000/api/search_users/?nome=mA
 # %20 para espaço
 # %40 para underscore
+@api_view(['GET'])
 def search_users(request):
     nome = request.GET.get('nome')
     username = request.GET.get('username')
@@ -132,6 +133,15 @@ def search_users(request):
 
     if not nome and not username and not email:
         return Response({"error": "Pelo menos um parâmetro de busca deve ser fornecido."}, status=400)
+
+    if nome and not nome.isalpha():
+        return Response({"error": "O parâmetro 'nome' deve conter apenas letras."}, status=400)
+
+    if username and not username.isalnum():
+        return Response({"error": "O parâmetro 'username' deve conter apenas letras e números."}, status=400)
+
+    if email and ('@' not in email or '.' not in email):
+        return Response({"error": "O parâmetro 'email' deve ser um endereço de email válido."}, status=400)
 
     query = Q()
     if nome:
@@ -142,6 +152,9 @@ def search_users(request):
         query &= Q(email__icontains=email)
 
     users = mdl.Usuario.objects.filter(query).select_related()
+
+    if not users.exists():
+        return Response({"message": "Nenhum usuário encontrado com os critérios de busca fornecidos."}, status=404)
 
     serializer = srl.UsuarioSerializer(users, many=True)
     return Response({
