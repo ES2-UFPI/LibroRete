@@ -6,5 +6,5 @@ urlpatterns = [
     path('perfis/<str:nick>', views.get_by_nick, name='perfis'),
     path('listas/<str:nick>', views.get_user_lists, name='listas'),
     path('interacoes/', views.create_interaction, name='criar_interacao'),
-    path('search_users/', views.search_users, name='search_users'),
+    path('buscar-usuarios/', views.search_users, name='buscar_usuarios'),
 ]
