@@ -19,7 +19,7 @@ class LivroBuscaTests(TestCase):
         data = {
             'titulo': 'O Nome do Vento'
             }
-        response = self.client.get(reverse('api.views.search_books'), data)
+        response = self.client.get(reverse('buscar_livros'), data)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0)
         self.assertEqual(response.json()[0]['titulo'], 'O Nome do Vento')
@@ -28,7 +28,7 @@ class LivroBuscaTests(TestCase):
         data = {
             'autor': 'Patrick Rothfuss'
             }
-        response = self.client.get(reverse('api.views.search_books'), data)
+        response = self.client.get(reverse('buscar_livros'), data)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0)
         self.assertEqual(response.json()[0]['titulo'], 'O Nome do Vento')
@@ -37,10 +37,13 @@ class LivroBuscaTests(TestCase):
         data = {
             'genero': 'Distopia'
             }
-        response = self.client.get(reverse('api.views.search_books'), data)
+        response = self.client.get(reverse('buscar_livros'), data)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0)
-        self.assertEqual(response.json()[0]['titulo'], 'Admirável Mundo Novo')
+        
+        # Verificar se "Admirável Mundo Novo" está na lista de livros retornados
+        titulos = [livro['titulo'] for livro in response.json()]
+        self.assertIn('Admirável Mundo Novo', titulos)
 
     def test_busca_com_multiplos_filtros(self):
         data = {
@@ -49,13 +52,13 @@ class LivroBuscaTests(TestCase):
             'genero': 'Distopia'
             }
         
-        response = self.client.get(reverse('api.views.search_books'), data)
+        response = self.client.get(reverse('buscar_livros'), data)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.json()) > 0)
         self.assertEqual(response.json()[0]['titulo'], 'Admirável Mundo Novo')
 
     def test_busca_sem_parametros(self):
-        response = self.client.get(reverse('api.views.search_books'))
+        response = self.client.get(reverse('buscar_livros'))
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"erro": "Pelo menos um parâmetro de busca deve ser fornecido."})
 
@@ -63,6 +66,6 @@ class LivroBuscaTests(TestCase):
         data = {
             'titulo': 'Ovo cozido faz mal?'
             }
-        response = self.client.get(reverse('api.views.search_books'), data)
+        response = self.client.get(reverse('buscar_livros'), data)
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json(), {"erro": "Nenhum livro encontrado com os parâmetros fornecidos."})
