@@ -126,9 +126,9 @@ def create_interaction(request):
 # %20 para espaço
 # %40 para underscore
 def search_users(request):
-    nome = request.GET.get('nome', '')
-    username = request.GET.get('username', '')
-    email = request.GET.get('email', '')
+    nome = request.GET.get('nome')
+    username = request.GET.get('username')
+    email = request.GET.get('email')
 
     if not nome and not username and not email:
         return Response({"error": "Pelo menos um parâmetro de busca deve ser fornecido."}, status=400)
