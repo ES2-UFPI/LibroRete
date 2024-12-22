@@ -117,7 +117,8 @@ def criar_interacao(request):
     except Exception as e:
         return Response({"erro": f"Erro ao criar interação: {str(e)}"},status=500)
 
-
+# http://localhost:8000/api/buscar-livros/?autor=G&titulo=1
+# http://localhost:8000/api/buscar-livros/?autor=G
 @api_view(['GET'])
 def search_books(request):
     try:
