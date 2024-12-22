@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS usuario(
     nome VARCHAR(150) NOT NULL,
     username VARCHAR(20) UNIQUE NOT NULL,
     email VARCHAR(320) UNIQUE NOT NULL,
-    senha VARCHAR(255) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL,
     foto TEXT NOT NULL
 );
 
@@ -44,14 +44,12 @@ CREATE TABLE IF NOT EXISTS lista_livro(
 CREATE TABLE IF NOT EXISTS post(
     id INT PRIMARY KEY NOT NULL,
     conteudo VARCHAR(255) NOT NULL,
-    data_criacao DATETIME NOT NULL,
     midia TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS comentario(
     id INT PRIMARY KEY NOT NULL,
     conteudo VARCHAR(255) NOT NULL,
-    data_criacao DATETIME NOT NULL,
     id_comentario_pai INT NULL,
     id_post INT NOT NULL,
     FOREIGN KEY (id_comentario_pai) REFERENCES comentario(id),
@@ -63,6 +61,7 @@ CREATE TABLE IF NOT EXISTS interacao(
     tipo VARCHAR(50) NOT NULL,
     data_interacao DATETIME NOT NULL,
     id_usuario INT NOT NULL,
+    id_perfil_seguir INT NULL,
     id_post INT NULL,
     id_comentario INT NULL,
     id_comentario_respondido INT NULL,
@@ -70,10 +69,20 @@ CREATE TABLE IF NOT EXISTS interacao(
     FOREIGN KEY (id_usuario) REFERENCES usuario(id),
     FOREIGN KEY (id_post) REFERENCES post(id),
     FOREIGN KEY (id_comentario) REFERENCES comentario(id),
-    FOREIGN KEY (id_comentario_respondido) REFERENCES comentario(id)
+    FOREIGN KEY (id_comentario_respondido) REFERENCES comentario(id),
+    FOREIGN KEY (id_perfil_seguir) REFERENCES perfil(id)
 );
 
+CREATE TABLE IF NOT EXISTS tags(
+    nome VARCHAR(50) PRIMARY KEY NOT NULL
+);
 
+CREATE TABLE IF NOT EXISTS post_tag(
+    id_post INTEGER NOT NULL,
+    nome_tag VARCHAR(50) NOT NULL,
+    FOREIGN KEY (id_post) REFERENCES post(id),
+    FOREIGN KEY (nome_tag) REFERENCES tags(nome) 
+);
 
 INSERT IGNORE INTO usuario (id, nome, username, email, senha, foto) VALUES 
 (1, 'maria eduarda', '@eduarda', 'eduarda@gmail.com','2b869053f31a34090f3a8f14cbc73fb5b9cdde56604379c30a11b9b6f43203a4', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRw0nQQC1W3yDwpOFLJJTqmirx88ESUttZFLA&s'),
@@ -118,13 +127,23 @@ INSERT IGNORE INTO comentario (id, conteudo, id_comentario_pai, id_post) VALUES
 (4, "Siiimmmm queria poder bater minha cabeça só pra esquecer, e ler de novo kkkk",  3, 1),
 (5, "Esse livro é coisa de outro mundo 👽", NULL, 2);
 
+INSERT IGNORE INTO tags (nome) VALUES 
+("#Ficção"),
+("#Romance"),
+("#DiaDaLeitura"),
+("#Top");
 
-INSERT IGNORE INTO interacao (id, tipo, data_interacao, id_usuario, id_post, id_comentario,id_comentario_respondido, curtida) VALUES
-(1, "criar post", "2024/12/13 12:13:34", 1, 1, NULL,NULL, FALSE), -- Usuario 1 criou o post 1
-(3, "criar comentario", "2024/12/13 16:34:01", 2, 1, 1, NULL, FALSE), -- Usuario 2, no post 1, criou o comentário 1
-(4, "like post","2024/12/13 17:43:10", 2, 1, NULL,NULL, TRUE), -- Usuário 2, no post 1, deu um like no post
-(5, "criar comentario", "2024/12/13 18:12:21", 1, 1, 3, NULL, FALSE), -- Usuário 1, no post 1, criou o comentário 3
-(6, "responder comentario", "2024/12/13 18:12:21", 1, 1, 3, 1, FALSE), -- Usuario 1, no post 1, com o comentário 3 respondeu o comentário 1
-(7, "like comentario", "2024/12/13 19:35:05", 2, 1, 3, NULL, TRUE); -- Usuário 2, no post 1, deu um like no comentário 3
+INSERT IGNORE INTO post_tag (id_post, nome_tag) VALUES
+(1, "#DiaDaLeitura"),
+(1, "#Top");
+
+INSERT IGNORE INTO interacao (id, tipo, data_interacao, id_usuario, id_post, id_comentario,id_comentario_respondido, curtida, id_perfil_seguir) VALUES
+(1, "criar post", "2024/12/13 12:13:34", 1, 1, NULL,NULL, FALSE, NULL), -- Usuario 1 criou o post 1
+(3, "criar comentario", "2024/12/13 16:34:01", 2, 1, 1, NULL, FALSE, NULL), -- Usuario 2, no post 1, criou o comentário 1
+(4, "like post","2024/12/13 17:43:10", 2, 1, NULL,NULL, TRUE, NULL), -- Usuário 2, no post 1, deu um like no post
+(5, "criar comentario", "2024/12/13 18:12:21", 1, 1, 3, NULL, FALSE, NULL), -- Usuário 1, no post 1, criou o comentário 3
+(6, "responder comentario", "2024/12/13 18:12:21", 1, 1, 3, 1, FALSE, NULL), -- Usuario 1, no post 1, com o comentário 3 respondeu o comentário 1
+(7, "like comentario", "2024/12/13 19:35:05", 2, 1, 3, NULL, TRUE, NULL), -- Usuário 2, no post 1, deu um like no comentário 3
+(8, "seguir perfil", "2024/12/20", 1, NULL, NULL,NULL,NULL,2); -- Usuário 1 está seguindo o perfil de id 2
 
 SELECT * FROM interacao;
