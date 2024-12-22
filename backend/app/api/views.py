@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.db.models import Q
 from . import serializers as srl
 from . import models as mdl
 
@@ -66,9 +67,10 @@ def get_user_lists(request, nick):
     except Exception as e:
         return Response({"message": str(e)}, status=500)
 
+
 @csrf_exempt # Decorador perigoso?
 @api_view(['POST'])
-def criar_interacao(request):
+def create_interaction(request):
     try:
         # Obter dados do request
         tipo = request.data.get('tipo')
@@ -115,3 +117,27 @@ def criar_interacao(request):
 
     except Exception as e:
         return Response({"erro": f"Erro ao criar interação: {str(e)}"},status=500)
+
+
+def search_users(request):
+    nome = request.GET.get('nome', '')
+    username = request.GET.get('username', '')
+    email = request.GET.get('email', '')
+
+    if not nome and not username and not email:
+        return Response({"error": "Pelo menos um parâmetro de busca deve ser fornecido."}, status=400)
+
+    query = Q()
+    if nome:
+        query &= Q(nome__icontains=nome)
+    if username:
+        query &= Q(username__icontains=username)
+    if email:
+        query &= Q(email__icontains=email)
+
+    users = mdl.Usuario.objects.filter(query).select_related()
+
+    serializer = srl.UsuarioSerializer(users, many=True)
+    return Response({
+        'results': serializer.data
+    })
