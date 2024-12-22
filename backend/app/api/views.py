@@ -119,11 +119,11 @@ def create_interaction(request):
         return Response({"erro": f"Erro ao criar interação: {str(e)}"},status=500)
 
 
-# http://localhost:8000/api/search_users/?nome=Maria&username=eduarda
-# http://localhost:8000/api/search_users/?nome=Mancini&username=mancini
-# http://localhost:8000/api/search_users/?email=eduarda@gmail.com
-# http://localhost:8000/api/search_users/?nome=ma
-# http://localhost:8000/api/search_users/?nome=mA
+# http://localhost:8000/api/buscar-usuarios/?nome=Maria&username=eduarda
+# http://localhost:8000/api/buscar-usuarios/?nome=Mancini&username=mancini
+# http://localhost:8000/api/buscar-usuarios/?email=eduarda@gmail.com
+# http://localhost:8000/api/buscar-usuarios/?nome=ma
+# http://localhost:8000/api/buscar-usuarios/?nome=mA
 # %20 para espaço
 # %40 para underscore
 @api_view(['GET'])
