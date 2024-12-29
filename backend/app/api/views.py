@@ -181,7 +181,7 @@ def search_users(request):
 #    "conteudo": "Este é um novo post",
 #    "midia": "http://example.com/media.jpg",
 #    "id_usuario": 1,
-#    "data": "2023-10-10 12:00:00"
+#    "data": "2024-12-29 13:18:00"
 #  }
 @csrf_exempt # Decorador perigoso?
 @api_view(['POST'])
