@@ -227,7 +227,6 @@ def create_post(request):
         novo_post = mdl.Post(
             id=id_post,
             conteudo=conteudo,
-            data_criacao=data,
             midia=midia
         )
         novo_post.save()

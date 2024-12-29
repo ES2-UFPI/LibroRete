@@ -88,7 +88,6 @@ class CreatePostTests(TestCase):
         post = Post.objects.create(
             id=id_post,
             conteudo='Entao gente, este eh o novo livro que estou lancando',
-            data_criacao='2024-12-29 13:00:00',
             midia='http://example.com/media.jpg'
         )
         self.created_post_ids.append(post.id)
@@ -96,7 +95,6 @@ class CreatePostTests(TestCase):
         comentario = Comentario.objects.create(
             id=id_comen,
             conteudo='Muito ruim, slk',
-            data_criacao='2024-12-29 14:30:00',
             id_post=post
         )
 
