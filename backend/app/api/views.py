@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.db.models import Q
 from . import serializers as srl
 from . import models as mdl
 
@@ -66,9 +67,10 @@ def get_user_lists(request, nick):
     except Exception as e:
         return Response({"message": str(e)}, status=500)
 
+
 @csrf_exempt # Decorador perigoso?
 @api_view(['POST'])
-def criar_interacao(request):
+def create_interaction(request):
     try:
         # Obter dados do request
         tipo = request.data.get('tipo')
@@ -117,7 +119,7 @@ def criar_interacao(request):
         return Response({"erro": f"Erro ao criar interação: {str(e)}"},status=500)
 
 @api_view(['GET'])
-def get_posts(request):
+def get_all_posts(request):
     try:
         posts = mdl.Post.objects.all()
         serializer = srl.PostSerializer(posts, many=True)
@@ -142,3 +144,46 @@ def get_post_interacoes(request, id):
         return Response(serializer.data)
     except Exception as e:
         return Response({"erro": f"Erro ao buscar interações: {str(e)}"},status=500)
+
+# http://localhost:8000/api/buscar-usuarios/?nome=Maria&username=eduarda
+# http://localhost:8000/api/buscar-usuarios/?nome=Mancini&username=mancini
+# http://localhost:8000/api/buscar-usuarios/?email=eduarda@gmail.com
+# http://localhost:8000/api/buscar-usuarios/?nome=ma
+# http://localhost:8000/api/buscar-usuarios/?nome=mA
+# %20 para espaço
+# %40 para underscore
+@api_view(['GET'])
+def search_users(request):
+    nome = request.GET.get('nome')
+    username = request.GET.get('username')
+    email = request.GET.get('email')
+
+    if not nome and not username and not email:
+        return Response({"error": "Pelo menos um parâmetro de busca deve ser fornecido."}, status=400)
+
+    if nome and not nome.isalpha():
+        return Response({"error": "O parâmetro 'nome' deve conter apenas letras."}, status=400)
+
+    if username and not username.isalnum():
+        return Response({"error": "O parâmetro 'username' deve conter apenas letras e números."}, status=400)
+
+    if email and ('@' not in email or '.' not in email):
+        return Response({"error": "O parâmetro 'email' deve ser um endereço de email válido."}, status=400)
+
+    query = Q()
+    if nome:
+        query &= Q(nome__icontains=nome)
+    if username:
+        query &= Q(username__icontains=username)
+    if email:
+        query &= Q(email__icontains=email)
+
+    users = mdl.Usuario.objects.filter(query).select_related()
+
+    if not users.exists():
+        return Response({"message": "Nenhum usuário encontrado com os critérios de busca fornecidos."}, status=404)
+
+    serializer = srl.UsuarioSerializer(users, many=True)
+    return Response({
+        'results': serializer.data
+    })

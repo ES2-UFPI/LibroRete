@@ -191,7 +191,7 @@ class Perfil(models.Model):
 class Post(models.Model):
     id = models.IntegerField(primary_key=True)
     conteudo = models.CharField(max_length=255)
-    data_criacao = models.DateTimeField()
+    #data_criacao = models.DateTimeField()
     midia = models.TextField()
 
     class Meta:

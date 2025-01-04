@@ -38,3 +38,9 @@
 .feed-nav a.active {
   background-color: #f2eae0;
 }
+
+@media (max-width: 768px) {
+  .Feed {
+    margin-bottom: 30px;
+  }
+}
