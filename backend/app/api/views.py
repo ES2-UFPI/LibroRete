@@ -118,6 +118,32 @@ def create_interaction(request):
     except Exception as e:
         return Response({"erro": f"Erro ao criar interação: {str(e)}"},status=500)
 
+@api_view(['GET'])
+def get_all_posts(request):
+    try:
+        posts = mdl.Post.objects.all()
+        serializer = srl.PostSerializer(posts, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar posts: {str(e)}"},status=500)
+    
+@api_view(['GET'])
+def get_post(request, id):
+    try:
+        post = mdl.Post.objects.get(id=id)
+        serializer = srl.PostSerializer(post)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar post: {str(e)}"},status=500)
+    
+@api_view(['GET'])
+def get_post_interacoes(request, id):
+    try:
+        interacoes = mdl.Interacao.objects.filter(id_post=id)
+        serializer = srl.InteracaoSerializer(interacoes, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar interações: {str(e)}"},status=500)
 
 # http://localhost:8000/api/buscar-usuarios/?nome=Maria&username=eduarda
 # http://localhost:8000/api/buscar-usuarios/?nome=Mancini&username=mancini

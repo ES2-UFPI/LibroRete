@@ -16,3 +16,8 @@ class InteracaoSerializer(serializers.ModelSerializer):
     class Meta:
         model = mdl.Interacao
         fields = ['id', 'tipo', 'data_interacao', 'id_usuario', 'id_post']
+
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = mdl.Post
+        fields = '__all__'
