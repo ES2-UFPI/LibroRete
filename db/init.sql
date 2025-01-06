@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS post_tag(
 );
 
 INSERT IGNORE INTO usuario (id, nome, username, email, senha, foto) VALUES 
-(1, 'maria eduarda', '@eduarda', 'eduarda@gmail.com','2b869053f31a34090f3a8f14cbc73fb5b9cdde56604379c30a11b9b6f43203a4', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRw0nQQC1W3yDwpOFLJJTqmirx88ESUttZFLA&s'),
+(1, 'maria eduarda', '@eduarda', 'eduarda@gmail.com','2b869053f31a34090f3a8f14cbc73fb5b9cdde56604379c30a11b9b6f43203a4', 'https://png.pngtree.com/png-clipart/20230308/ourlarge/pngtree-cute-cat-sticker-cartoon-kitty-kitten-png-image_6635310.png'),
 (2, 'guilherme mancini', '@mancini', 'mancini@gmail.com','85e7613fc5c2e438bda561c68d9899cf3f648badaa558b01417630f06cf104c1', 'https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/391.png');
 
 
@@ -117,8 +117,8 @@ INSERT IGNORE INTO lista_livro (id_lista, isbn_livro) VALUES
 
 
 INSERT IGNORE INTO post (id, conteudo, midia) VALUES
-(1, "amei esse livro gente :)", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1ailnDneVDYRN_d55CjsYSy0Vk_sxHyvK9g&s"),
-(2, "Quem já leu essa maravilha??", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB_geGRhJccyOA5-XTRH7U1wmae-1CGGaxww&s");
+(1, "amei esse livro gente :)", "https://m.media-amazon.com/images/I/81ibfYk4qmL._AC_UF1000,1000_QL80_.jpg"),
+(2, "Quem já leu essa maravilha??", "https://m.media-amazon.com/images/I/71ZLavBjpRL._AC_UF1000,1000_QL80_.jpg");
 
 INSERT IGNORE INTO comentario (id, conteudo, id_comentario_pai, id_post) VALUES
 (1, "Tbm gostei miga", NULL, 1),
