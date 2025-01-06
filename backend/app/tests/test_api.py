@@ -14,7 +14,7 @@ class APITests(TestCase):
         
         # Validações
         self.assertEqual(response.status_code, 200)  # Verifica se a resposta é 200 OK
-        self.assertEqual(response.json(), {"id": 1, "nome": "maria eduarda","username": "@eduarda","email": "eduarda@gmail.com","senha": "2b869053f31a34090f3a8f14cbc73fb5b9cdde56604379c30a11b9b6f43203a4","foto": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRw0nQQC1W3yDwpOFLJJTqmirx88ESUttZFLA&s"})  # Substitua pelo JSON esperado
+        self.assertEqual(response.json(), {"id":1,"nome":"maria eduarda","username":"@eduarda","email":"eduarda@gmail.com","senha":"2b869053f31a34090f3a8f14cbc73fb5b9cdde56604379c30a11b9b6f43203a4","foto":"https://png.pngtree.com/png-clipart/20230308/ourlarge/pngtree-cute-cat-sticker-cartoon-kitty-kitten-png-image_6635310.png"})  # Substitua pelo JSON esperado
     
     def test_perfil_endpoint(self):
         response = self.client.get("/api/perfis/@eduarda")

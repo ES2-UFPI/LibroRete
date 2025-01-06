@@ -127,23 +127,28 @@ def get_all_posts(request):
     except Exception as e:
         return Response({"erro": f"Erro ao buscar posts: {str(e)}"},status=500)
     
+      
 @api_view(['GET'])
-def get_post(request, id):
+def get_post_usuario(request, nick):
     try:
-        post = mdl.Post.objects.get(id=id)
-        serializer = srl.PostSerializer(post)
-        return Response(serializer.data)
+        usuario = mdl.Usuario.objects.get(username=nick)
+        
+        # Filtrar interações do tipo 'criar post' para o usuário
+        interacoes = mdl.Interacao.objects.filter(id_usuario=usuario.id, tipo='criar post')
+        
+        # Serializar os posts relacionados
+        posts_user = []
+        for interacao in interacoes:
+            if interacao.id_post:  # Certificar que a interação possui um post
+                post = interacao.id_post  # Já é um objeto Post pela relação ForeignKey
+                serializer = srl.PostSerializer(post)
+                posts_user.append(serializer.data)  # Adicionar o JSON do post à lista
+        
+        return Response(posts_user, status=200)
+    except mdl.Usuario.DoesNotExist:
+        return Response({"erro": "Usuário não encontrado."}, status=404)
     except Exception as e:
-        return Response({"erro": f"Erro ao buscar post: {str(e)}"},status=500)
-    
-@api_view(['GET'])
-def get_post_interacoes(request, id):
-    try:
-        interacoes = mdl.Interacao.objects.filter(id_post=id)
-        serializer = srl.InteracaoSerializer(interacoes, many=True)
-        return Response(serializer.data)
-    except Exception as e:
-        return Response({"erro": f"Erro ao buscar interações: {str(e)}"},status=500)
+        return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
 
 # http://localhost:8000/api/buscar-usuarios/?nome=Maria&username=eduarda
 # http://localhost:8000/api/buscar-usuarios/?nome=Mancini&username=mancini
