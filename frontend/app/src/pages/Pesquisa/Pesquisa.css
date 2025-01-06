@@ -1,0 +1,164 @@
+#search-form {
+  flex: 1;
+  width: 760px;
+  overflow-y: auto;
+  margin: 50px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 20px;
+  border-radius: 10px;
+  background-color: #faf7f4;
+  scrollbar-width: none;
+}
+
+.search-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+}
+
+.search-bar-container {
+  flex: 1;
+}
+
+.search-button {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  color: #8a726a;
+  border-radius: 5px;
+  background-color: #f2eae0;
+}
+
+.search-button:hover {
+  background-color: #e8dbd0;
+  color: #755c52;
+}
+
+.search-button:active {
+  background-color: #e8dbd0;
+  transform: scale(0.98);
+}
+
+.text-input {
+  height: 34px;
+  padding: 0px 10px;
+  background-color: #f2eae0;
+  border-radius: 5px;
+  font-family: 'Inter', sans-serif;
+}
+
+.text-input:focus {
+  outline: none;
+  box-shadow: 0 0 8px rgba(193, 184, 116, 0.2);
+}
+
+.text-input::placeholder {
+  color: #aaa;
+}
+
+#search_bar {
+  width: 100%;
+}
+
+.filter-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 30px;
+}
+
+.filter-op-button {
+  font-weight: 700;
+  color: #646362;
+  background-color: #faf7f4;
+}
+
+.filter-op-button:hover {
+  color: #4b4b4b;
+}
+
+.filter-op-button.active {
+  color: black;
+}
+
+.adic-filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.adic-filters {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.adic-filter {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-label {
+  font-size: 0.9rem;
+}
+
+.adic-filter-button {
+  flex: 1;
+  min-width: 200px;
+  height: 34px;
+  align-self: flex-end;
+  font-weight: 600;
+  color: white;
+  border-radius: 5px;
+  background-color: #c3b6b0;
+}
+
+.adic-filter-button:hover {
+  background-color: #b2a39a;
+  border-color: #a28c77;
+}
+
+.adic-filter-button:active {
+  background-color: #a28c77;
+  transform: scale(0.98);
+}
+
+.search-results {
+  display: flex !important;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 1100px) {
+  #search-form {
+    max-width: 640px;
+  }
+}
+
+@media (max-width: 950px) {
+  #search-form {
+    max-width: 504px;
+  }
+}
+
+@media (max-width: 580px) {
+  #search-form {
+    max-width: 384px;
+  }
+}
+
+@media (max-width: 480px) {
+  #search-form {
+    max-width: 244px;
+  }
+}

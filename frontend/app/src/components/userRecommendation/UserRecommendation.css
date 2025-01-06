@@ -1,5 +1,5 @@
 .User {
-  width: 200px;
+  flex: 1;
   min-width: 200px;
   display: flex;
   flex-direction: column;
