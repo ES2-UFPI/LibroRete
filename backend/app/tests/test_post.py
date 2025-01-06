@@ -20,3 +20,14 @@ class PostTestCase(TestCase):
     }
 ])  # Substitua pelo JSON esperad
 
+    def test_get_post_usuario(self):
+
+        response = self.client.get("/api/posts/@eduarda")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [
+        {
+            "id": 1,
+            "conteudo": "amei esse livro gente :)",
+            "midia": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1ailnDneVDYRN_d55CjsYSy0Vk_sxHyvK9g&s"
+        }
+    ])
