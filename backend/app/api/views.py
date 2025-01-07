@@ -132,6 +132,38 @@ def create_interaction(request):
     except Exception as e:
         return Response({"erro": f"Erro ao criar interação: {str(e)}"},status=500)
 
+# http://localhost:8000/api/buscar-livros/?autor=G&titulo=1
+# http://localhost:8000/api/buscar-livros/?autor=G
+@api_view(['GET'])
+def search_books(request):
+    try:
+        titulo = request.GET.get('titulo')
+        autor = request.GET.get('autor')
+        genero = request.GET.get('genero')
+
+        if not titulo and not autor and not genero:
+            return Response({"erro": "Pelo menos um parâmetro de busca deve ser fornecido."}, status=400)
+
+        if titulo == "" or autor == "" or genero == "":
+            return Response({"erro": "Parâmetros de busca não podem ser vazios."}, status=400)
+        
+        query = Q()
+        if titulo:
+            query &= Q(titulo__icontains=titulo)
+        if autor:
+            query &= Q(autor__icontains=autor)
+        if genero:
+            query &= Q(genero__iexact=genero)
+
+        livros = mdl.Livro.objects.filter(query).select_related()
+        if not livros.exists():
+            return Response({"erro": "Nenhum livro encontrado com os parâmetros fornecidos."}, status=404)
+
+        serializer = srl.LivroSerializer(livros, many=True)
+        return Response(serializer.data, status=200)
+    except Exception as e:
+        return Response({"erro": str(e)}, status=500)
+
 @api_view(['GET'])
 def get_all_posts(request):
     try:
