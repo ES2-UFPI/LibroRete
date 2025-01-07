@@ -46,7 +46,7 @@ function CriaPost() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} id="cria-post-form">
       <div className="info-text">
         <h3>Crie um novo post</h3>
         <p>Compartilhe com a rede suas atualizações</p>
@@ -100,7 +100,7 @@ function CriaPost() {
         </div>
       </div>
       <div className="legenda">
-        <label htmlFor="caption" className="label-info">
+        <label htmlFor="caption_create" className="label-info">
           Legenda
         </label>
         <textarea
