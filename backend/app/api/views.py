@@ -3,12 +3,11 @@ from rest_framework.decorators import api_view, parser_classes
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.db.models import Q
-from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from . import serializers as srl
 from . import models as mdl
-
+from . import utils as u
 
 @api_view(['GET'])
 def get_by_nick(request, nick):
@@ -297,3 +296,52 @@ def create_post(request):
 
     serializer = srl.PostSerializer(novo_post)
     return Response(serializer.data, status=201)
+
+@api_view(['GET'])
+def get_post_tags(request, post_id):
+    try:
+        post = mdl.Post.objects.get(id=post_id)
+        post_tags = mdl.PostTag.objects.filter(id_post=post)
+        tags = mdl.Tags.objects.filter(
+            nome__in=post_tags.values_list('nome_tag', flat=True)
+        )
+        return Response({
+            'tags': [tag.nome for tag in tags]
+        }, status=200)
+    except mdl.Post.DoesNotExist:
+        return Response({"erro": "Post não encontrado"}, status=404)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar tags: {str(e)}"}, status=500)
+
+@api_view(['GET'])
+def get_user_tags(request, nick):
+    try:
+        tags = u.get_user_interaction_tags(nick)
+        
+        if isinstance(tags, dict) and "erro" in tags:
+            return Response(tags, status=404)
+            
+        return Response(tags, status=200)
+        
+    except Exception as e:
+        return Response(
+            {"erro": f"Erro ao buscar tags: {str(e)}"}, 
+            status=500
+        )
+
+
+@api_view(['GET'])
+def get_user_tag_interactions(request, nick):
+    try:
+        tag_counts = u.count_user_tag_interactions(nick)
+        
+        if isinstance(tag_counts, dict) and "erro" in tag_counts:
+            return Response(tag_counts, status=404)
+            
+        return Response(tag_counts, status=200)
+        
+    except Exception as e:
+        return Response(
+            {"erro": f"Erro ao buscar contagem de tags: {str(e)}"}, 
+            status=500
+        )

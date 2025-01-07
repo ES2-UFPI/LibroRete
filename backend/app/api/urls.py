@@ -11,4 +11,5 @@ urlpatterns = [
     path('novo-post/', views.create_post, name='criar_post'),
     path('posts/', views.get_all_posts, name='posts'),
     path('posts/<str:nick>', views.get_post_usuario, name='post_usuario'),
+    path('usuarios/<str:nick>/tags/contar/', views.get_user_tag_interactions, name='buscar_tags_contador_usuario')
     ]
