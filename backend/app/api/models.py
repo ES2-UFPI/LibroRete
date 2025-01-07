@@ -80,7 +80,6 @@ class AuthUserUserPermissions(models.Model):
 class Comentario(models.Model):
     id = models.IntegerField(primary_key=True)
     conteudo = models.CharField(max_length=255)
-    data_criacao = models.DateTimeField()
     id_comentario_pai = models.ForeignKey('self', models.DO_NOTHING, db_column='id_comentario_pai', blank=True, null=True)
     id_post = models.ForeignKey('Post', models.DO_NOTHING, db_column='id_post')
 
@@ -139,7 +138,11 @@ class Interacao(models.Model):
     tipo = models.CharField(max_length=50)
     data_interacao = models.DateTimeField()
     id_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='id_usuario')
-    id_post = models.ForeignKey('Post', models.DO_NOTHING, db_column='id_post')
+    id_perfil_seguir = models.ForeignKey('Perfil', models.DO_NOTHING, db_column='id_perfil_seguir', blank=True, null=True)
+    id_post = models.ForeignKey('Post', models.DO_NOTHING, db_column='id_post', blank=True, null=True)
+    id_comentario = models.ForeignKey(Comentario, models.DO_NOTHING, db_column='id_comentario', blank=True, null=True)
+    id_comentario_respondido = models.ForeignKey(Comentario, models.DO_NOTHING, db_column='id_comentario_respondido', related_name='interacao_id_comentario_respondido_set', blank=True, null=True)
+    curtida = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -191,7 +194,6 @@ class Perfil(models.Model):
 class Post(models.Model):
     id = models.IntegerField(primary_key=True)
     conteudo = models.CharField(max_length=255)
-    data_criacao = models.DateTimeField()
     midia = models.TextField()
 
     class Meta:
@@ -199,12 +201,29 @@ class Post(models.Model):
         db_table = 'post'
 
 
+class PostTag(models.Model):
+    id_post = models.ForeignKey(Post, models.DO_NOTHING, db_column='id_post')
+    nome_tag = models.ForeignKey('Tags', models.DO_NOTHING, db_column='nome_tag')
+
+    class Meta:
+        managed = False
+        db_table = 'post_tag'
+
+
+class Tags(models.Model):
+    nome = models.CharField(primary_key=True, max_length=50)
+
+    class Meta:
+        managed = False
+        db_table = 'tags'
+
+
 class Usuario(models.Model):
     id = models.IntegerField(primary_key=True)
     nome = models.CharField(max_length=150)
     username = models.CharField(unique=True, max_length=20)
     email = models.CharField(unique=True, max_length=320)
-    senha = models.CharField(unique=True, max_length=255)
+    senha = models.CharField(max_length=255)
     foto = models.TextField()
 
     class Meta:

@@ -6,7 +6,7 @@ const UserRecommendation = ({ username, photo }) => {
     <div className="User">
       <img src={photo} alt="my-photo" />
       <h5>{username}</h5>
-      <button>Seguir</button>
+      <button id="rec-follow-button">Seguir</button>
     </div>
   )
 }

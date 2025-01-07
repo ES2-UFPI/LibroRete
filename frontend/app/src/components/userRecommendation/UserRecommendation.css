@@ -1,5 +1,5 @@
 .User {
-  width: 200px;
+  flex: 1;
   min-width: 200px;
   display: flex;
   flex-direction: column;
@@ -17,7 +17,7 @@
   object-fit: cover;
 }
 
-button {
+#rec-follow-button {
   width: 80px;
   height: 26px;
   padding: 5px 15px;
@@ -32,10 +32,10 @@ button {
   transition: background-color 0.3s;
 }
 
-button:hover {
+#rec-follow-button:hover {
   background-color: #8e7a68;
 }
 
-button:active {
+#rec-follow-button:active {
   background-color: #756349;
 }

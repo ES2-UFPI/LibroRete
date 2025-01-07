@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS usuario(
     nome VARCHAR(150) NOT NULL,
     username VARCHAR(20) UNIQUE NOT NULL,
     email VARCHAR(320) UNIQUE NOT NULL,
-    senha VARCHAR(255) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL,
     foto TEXT NOT NULL
 );
 
@@ -44,14 +44,12 @@ CREATE TABLE IF NOT EXISTS lista_livro(
 CREATE TABLE IF NOT EXISTS post(
     id INT PRIMARY KEY NOT NULL,
     conteudo VARCHAR(255) NOT NULL,
-    data_criacao DATETIME NOT NULL,
     midia TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS comentario(
     id INT PRIMARY KEY NOT NULL,
     conteudo VARCHAR(255) NOT NULL,
-    data_criacao DATETIME NOT NULL,
     id_comentario_pai INT NULL,
     id_post INT NOT NULL,
     FOREIGN KEY (id_comentario_pai) REFERENCES comentario(id),
@@ -63,6 +61,7 @@ CREATE TABLE IF NOT EXISTS interacao(
     tipo VARCHAR(50) NOT NULL,
     data_interacao DATETIME NOT NULL,
     id_usuario INT NOT NULL,
+    id_perfil_seguir INT NULL,
     id_post INT NULL,
     id_comentario INT NULL,
     id_comentario_respondido INT NULL,
@@ -70,13 +69,23 @@ CREATE TABLE IF NOT EXISTS interacao(
     FOREIGN KEY (id_usuario) REFERENCES usuario(id),
     FOREIGN KEY (id_post) REFERENCES post(id),
     FOREIGN KEY (id_comentario) REFERENCES comentario(id),
-    FOREIGN KEY (id_comentario_respondido) REFERENCES comentario(id)
+    FOREIGN KEY (id_comentario_respondido) REFERENCES comentario(id),
+    FOREIGN KEY (id_perfil_seguir) REFERENCES perfil(id)
 );
 
+CREATE TABLE IF NOT EXISTS tags(
+    nome VARCHAR(50) PRIMARY KEY NOT NULL
+);
 
+CREATE TABLE IF NOT EXISTS post_tag(
+    id_post INTEGER NOT NULL,
+    nome_tag VARCHAR(50) NOT NULL,
+    FOREIGN KEY (id_post) REFERENCES post(id),
+    FOREIGN KEY (nome_tag) REFERENCES tags(nome) 
+);
 
 INSERT IGNORE INTO usuario (id, nome, username, email, senha, foto) VALUES 
-(1, 'maria eduarda', '@eduarda', 'eduarda@gmail.com','2b869053f31a34090f3a8f14cbc73fb5b9cdde56604379c30a11b9b6f43203a4', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRw0nQQC1W3yDwpOFLJJTqmirx88ESUttZFLA&s'),
+(1, 'maria eduarda', '@eduarda', 'eduarda@gmail.com','2b869053f31a34090f3a8f14cbc73fb5b9cdde56604379c30a11b9b6f43203a4', 'https://png.pngtree.com/png-clipart/20230308/ourlarge/pngtree-cute-cat-sticker-cartoon-kitty-kitten-png-image_6635310.png'),
 (2, 'guilherme mancini', '@mancini', 'mancini@gmail.com','85e7613fc5c2e438bda561c68d9899cf3f648badaa558b01417630f06cf104c1', 'https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/391.png');
 
 
@@ -109,7 +118,10 @@ INSERT IGNORE INTO lista_livro (id_lista, isbn_livro) VALUES
 
 INSERT IGNORE INTO post (id, conteudo, midia) VALUES
 (1, "amei esse livro gente :)", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1ailnDneVDYRN_d55CjsYSy0Vk_sxHyvK9g&s"),
-(2, "Quem já leu essa maravilha??", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB_geGRhJccyOA5-XTRH7U1wmae-1CGGaxww&s");
+(2, "Quem já leu essa maravilha??", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB_geGRhJccyOA5-XTRH7U1wmae-1CGGaxww&s"),
+(3, "Já tô preparando minha estante kkjjk", "https://static.wixstatic.com/media/c5af93_a56b3ef2ca444a9ba69e260989c10a3c~mv2.jpg/v1/fill/w_980,h_860,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/c5af93_a56b3ef2ca444a9ba69e260989c10a3c~mv2.jpg"),
+(4, "Lendo um clássicooooo!!!", "https://p2.trrsf.com/image/fget/cf/774/0/images.terra.com/2015/04/17/thumbnail644.jpg");
+
 
 INSERT IGNORE INTO comentario (id, conteudo, id_comentario_pai, id_post) VALUES
 (1, "Tbm gostei miga", NULL, 1),
@@ -118,13 +130,51 @@ INSERT IGNORE INTO comentario (id, conteudo, id_comentario_pai, id_post) VALUES
 (4, "Siiimmmm queria poder bater minha cabeça só pra esquecer, e ler de novo kkkk",  3, 1),
 (5, "Esse livro é coisa de outro mundo 👽", NULL, 2);
 
+INSERT IGNORE INTO tags (nome) VALUES 
+("#Ficção"),
+("#Romance"),
+("#Fantasia"),
+("#Terror"),
+("#Aventura"),
+("#Drama"),
+("#Policial"),
+("#Suspense"),
+("#Historico"),
+("#Distopia"),
+("#Fabula"),
+("#DiaDaLeitura"),
+("#GeorgeOrwell"),
+("#DavidArnold"),
+("#A.J.Fikry"),
+("#CharlesDarwin"),
+("#DanielNoNohay"),
+("#PequenoPrincipe"),
+("#Top");
 
-INSERT IGNORE INTO interacao (id, tipo, data_interacao, id_usuario, id_post, id_comentario,id_comentario_respondido, curtida) VALUES
-(1, "criar post", "2024/12/13 12:13:34", 1, 1, NULL,NULL, FALSE), -- Usuario 1 criou o post 1
-(3, "criar comentario", "2024/12/13 16:34:01", 2, 1, 1, NULL, FALSE), -- Usuario 2, no post 1, criou o comentário 1
-(4, "like post","2024/12/13 17:43:10", 2, 1, NULL,NULL, TRUE), -- Usuário 2, no post 1, deu um like no post
-(5, "criar comentario", "2024/12/13 18:12:21", 1, 1, 3, NULL, FALSE), -- Usuário 1, no post 1, criou o comentário 3
-(6, "responder comentario", "2024/12/13 18:12:21", 1, 1, 3, 1, FALSE), -- Usuario 1, no post 1, com o comentário 3 respondeu o comentário 1
-(7, "like comentario", "2024/12/13 19:35:05", 2, 1, 3, NULL, TRUE); -- Usuário 2, no post 1, deu um like no comentário 3
+INSERT IGNORE INTO post_tag (id_post, nome_tag) VALUES
+(1, "#DiaDaLeitura"),
+(1, "#Top"),
+(3, "#GeorgeOrwell"),
+(3, "#DavidArnold"),
+(3, "#A.J.Fikry"),
+(3, "#CharlesDarwin"),
+(3, "#DanielNoNohay"),
+(3, "#Distopia"),
+(3, "#Historico"),
+(3, "#Top"),
+(4, "#Fabula"),
+(4, "#Fantasia"),
+(4, "#PequenoPrincipe");
+
+INSERT IGNORE INTO interacao (id, tipo, data_interacao, id_usuario, id_post, id_comentario,id_comentario_respondido, curtida, id_perfil_seguir) VALUES
+(1, "criar post", "2024/12/13 12:13:34", 1, 1, NULL,NULL, FALSE, NULL), -- Usuario 1 criou o post 1
+(3, "criar comentario", "2024/12/13 16:34:01", 2, 1, 1, NULL, FALSE, NULL), -- Usuario 2, no post 1, criou o comentário 1
+(4, "like post","2024/12/13 17:43:10", 2, 1, NULL,NULL, TRUE, NULL), -- Usuário 2, no post 1, deu um like no post
+(5, "criar comentario", "2024/12/13 18:12:21", 1, 1, 3, NULL, FALSE, NULL), -- Usuário 1, no post 1, criou o comentário 3
+(6, "responder comentario", "2024/12/13 18:12:21", 1, 1, 3, 1, FALSE, NULL), -- Usuario 1, no post 1, com o comentário 3 respondeu o comentário 1
+(7, "like comentario", "2024/12/13 19:35:05", 2, 1, 3, NULL, TRUE, NULL), -- Usuário 2, no post 1, deu um like no comentário 3
+(8, "seguir perfil", "2024/12/20", 1, NULL, NULL,NULL,NULL,2), -- Usuário 1 está seguindo o perfil de id 2
+(9, "criar post", "2025/01/01 14:04:00", 1, 3,NULL,NULL,FALSE,NULL), -- Usuario 1 criou o post 3
+(10, "criar post", "2025/01/02 15:10:21", 1, 4,NULL,NULL,FALSE,NULL); -- Usuario 1 criou o post 4
 
 SELECT * FROM interacao;
