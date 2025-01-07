@@ -41,6 +41,11 @@
   margin-bottom: 10px;
 }
 
+.info-text p {
+  max-width: 320px;
+  overflow-wrap: break-word;
+}
+
 .ProfileContent {
   max-width: 600px;
   flex: 1;

@@ -1,0 +1,41 @@
+.User {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background-color: #f2eae0;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.User img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+#rec-follow-button {
+  width: 80px;
+  height: 26px;
+  padding: 5px 15px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #faf7f4;
+  background-color: #a9968d;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#rec-follow-button:hover {
+  background-color: #8e7a68;
+}
+
+#rec-follow-button:active {
+  background-color: #756349;
+}
