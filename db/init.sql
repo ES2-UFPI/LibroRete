@@ -130,6 +130,7 @@ INSERT IGNORE INTO comentario (id, conteudo, id_comentario_pai, id_post) VALUES
 (4, "Siiimmmm queria poder bater minha cabeça só pra esquecer, e ler de novo kkkk",  3, 1),
 (5, "Esse livro é coisa de outro mundo 👽", NULL, 2);
 
+
 INSERT IGNORE INTO tags (nome) VALUES 
 ("#Ficção"),
 ("#Romance"),
