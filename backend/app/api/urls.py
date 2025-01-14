@@ -11,4 +11,5 @@ urlpatterns = [
     path('novo-post/', views.create_post, name='criar_post'),
     path('posts/', views.get_all_posts, name='posts'),
     path('posts/<str:nick>', views.get_post_usuario, name='post_usuario'),
+    path('livros-recom/<str:nick>/', views.get_books_by_user_top_tags, name='livros_recom'),
     ]
