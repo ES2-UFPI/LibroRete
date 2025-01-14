@@ -345,3 +345,30 @@ def get_user_tag_interactions(request, nick):
             {"erro": f"Erro ao buscar contagem de tags: {str(e)}"}, 
             status=500
         )
+
+
+@api_view(['GET'])
+def get_posts_by_user_top_tags(request, nick):
+    try:
+        tag_counts = u.count_user_tag_interactions(nick)
+        
+        if isinstance(tag_counts, dict) and "erro" in tag_counts:
+            return Response(tag_counts, status=404)
+        
+        # Selecionar as duas primeiras tags
+        top_tags = [tag['tag'] for tag in tag_counts['tag_interactions'][:2]]
+        
+        posts = mdl.Post.objects.filter(posttag__nome_tag__in=top_tags).distinct()
+        
+        serializer = srl.PostSerializer(posts, many=True)
+        
+        '''        
+        post_id_list = []
+        for post in posts:
+            post_id_list.append(post.id)
+        '''
+        
+        return Response(serializer.data, status=200)
+        
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
