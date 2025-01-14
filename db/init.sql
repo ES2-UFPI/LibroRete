@@ -186,5 +186,4 @@ INSERT IGNORE INTO interacao (id, tipo, data_interacao, id_usuario, id_post, id_
 (11, "criar post", "2025/01/07 10:23:50",2,5,NULL,NULL,FALSE,NULL), -- Usuário 2 criou o post 5
 (12, "criar post", "2025/01/10 20:43:12",2,6,NULL,NULL,FALSE,NULL), -- Usuario 2 criou o post 6
 (13, "criar comentario", "2025/01/07 14:05:04", 1, 5, 6,NULL,FALSE,NULL), -- Usuario 1, no post 5, criou o comentario 6
-(13, "criar comentario", "2025/01/07 14:05:04", 1, 5, 6,NULL,FALSE,NULL)
-SELECT * FROM interacao;
+(14, "criar comentario", "2025/01/11 12:32:23", 1, 6, 7,NULL,FALSE,NULL); -- Usuario 1, no post 6, criou o comentario 7
