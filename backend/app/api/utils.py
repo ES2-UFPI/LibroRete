@@ -111,7 +111,7 @@ def count_user_tag_interactions(username):
                         else:
                             tag_counter[tag] = 1
         
-        sorted_tags = sorted(tag_counter.items(), key=lambda x: x[1], reverse=True)[:5]
+        sorted_tags = sorted(tag_counter.items(), key=lambda x: x[1], reverse=True)
         
         tag_list = []
         for tag, count in sorted_tags:
