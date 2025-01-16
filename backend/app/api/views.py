@@ -6,6 +6,7 @@ from django.db.models import Q
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+from . import utils as u
 from . import serializers as srl
 from . import models as mdl
 
@@ -297,3 +298,26 @@ def create_post(request):
 
     serializer = srl.PostSerializer(novo_post)
     return Response(serializer.data, status=201)
+
+@api_view(['GET'])
+def get_users_by_user_top_tags(request, nick):
+    try:
+        tag_counts = u.count_user_tag_interactions(nick)
+        
+        if isinstance(tag_counts, dict) and "erro" in tag_counts:
+            return Response(tag_counts, status=404)
+        
+        top_tags = [tag['tag'] for tag in tag_counts['tag_interactions'][:2]]
+        
+        usuario_atual = mdl.Usuario.objects.get(username=nick)
+
+        users = mdl.Usuario.objects.filter(interacao__id_post__posttag__nome_tag__in=top_tags).exclude(id=usuario_atual.id).distinct()
+        
+        serializer = srl.UsuarioSerializer(users, many=True)
+        
+        return Response(serializer.data, status=200)
+        
+    except mdl.Usuario.DoesNotExist:
+        return Response({"erro": "Usuário não encontrado"}, status=404)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar usuários: {str(e)}"}, status=500)
