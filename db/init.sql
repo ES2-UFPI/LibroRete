@@ -93,8 +93,8 @@ INSERT IGNORE INTO usuario (id, nome, username, email, senha, foto) VALUES
 INSERT IGNORE INTO perfil (id, bio, interesses, id_usuario_perfil) VALUES
 (1, 'Idade: 28 anos Profissão: Desenvolvedor de Software | Pronome: Ela/Dela', 'Amante de livros 📚 | Viajante por mundos imaginários e histórias inesquecíveis ✨ | Sempre em busca da próxima página para virar 📖 | Compartilhando paixões literárias e explorando universos através das palavras 🌍📕', 1),
 (2, 'Idade: 35 anos Profissão: Professor | Pronome: Ele/Dele', 'Entusiasta da vida digital 🌐 | Apaixonado por aprender 📚 | Explorando o mundo, uma ideia de cada vez ✨', 2),
-(3, 'Idade: 17 anos Profissão: Desenhista | Pronome: Ela/Dela', '🎨 Designer apaixonada por arte e criatividade | 🖌️ Transformando ideias em projetos incríveis | 💡 Inspirando com design e lifestyle', 3); -- Laila
-(4, 'Idade: 23 anos Profissão: Animer | Pronome: Ele/Dele', '🌟 Apaixonado por viagens e aventuras | 📸 Capturando momentos ao redor do mundo | 🍽️ Explorando sabores, culturas e destinos', 4), -- ygor
+(3, 'Idade: 17 anos Profissão: Desenhista | Pronome: Ela/Dela', '🎨 Designer apaixonada por arte e criatividade | 🖌️ Transformando ideias em projetos incríveis | 💡 Inspirando com design e lifestyle', 3), -- Laila
+(4, 'Idade: 23 anos Profissão: Animer | Pronome: Ele/Dele', '🌟 Apaixonado por viagens e aventuras | 📸 Capturando momentos ao redor do mundo | 🍽️ Explorando sabores, culturas e destinos', 4); -- ygor
 
 INSERT IGNORE INTO lista (id, nome, descricao, id_perfil_lista) VALUES
 (435, 'livros de 2024','meus favoritos de 2024', 1),
@@ -190,7 +190,7 @@ INSERT IGNORE INTO interacao (id, tipo, data_interacao, id_usuario, id_post, id_
 (8, "seguir perfil", "2024/12/20 20:55:05", 1, NULL, NULL,FALSE,NULL,2), -- Usuário 1 está seguindo o perfil de id 2
 (9, "criar post", "2025/01/01 14:04:00", 1, 3,NULL,NULL,FALSE,NULL), -- Usuario 1 criou o post 3
 (10, "criar post", "2025/01/02 15:10:21", 1, 4,NULL,NULL,FALSE,NULL), -- Usuario 1 criou o post 4
-(11, "criar post", "2025/01/07 10:23:50",2,5,NULL,NULL,FALSE,NULL), -- Usuário 2 criou o post 5
+(11, "criar post", "2025/01/07 10:23:50",2,5,NULL,NULL,FALSE,NULL), -- Usuário 2 criou o post 5             !@#@#$#$#$#$
 (12, "criar post", "2025/01/10 20:43:12",2,6,NULL,NULL,FALSE,NULL), -- Usuario 2 criou o post 6
 (13, "criar comentario", "2025/01/07 14:05:04", 1, 5, 6,NULL,FALSE,NULL), -- Usuario 1, no post 5, criou o comentario 6
 (14, "criar comentario", "2025/01/11 12:32:23", 1, 6, 7,NULL,FALSE,NULL), -- Usuario 1, no post 6, criou o comentario 7
@@ -200,3 +200,7 @@ INSERT IGNORE INTO interacao (id, tipo, data_interacao, id_usuario, id_post, id_
 (18, "seguir perfil", "2025/01/01 13:03:00", 4, NULL, NULL,FALSE,NULL,3), -- Usuário 4 está seguindo o perfil de id 3
 (19, "like post","2025/01/10 17:12:05", 3, 8, NULL,NULL, TRUE, NULL), -- Usuário 3, no post 8, deu um like no post
 (20, "like post","2025/01/11 20:30:10", 4, 7, NULL,NULL, TRUE, NULL), -- Usuário 4, no post 7, deu um like no post
+(21, "seguir perfil", "2025/01/09 13:44:10", 2, NULL, NULL,FALSE,NULL,1), -- Usuário 2 está seguindo o perfil de id 1
+(22, "seguir perfil", "2025/01/04 11:32:03", 2, NULL, NULL,FALSE,NULL,3), -- Usuário 2 está seguindo o perfil de id 3
+(23, "seguir perfil", "2025/01/03 19:15:02", 2, NULL, NULL,FALSE,NULL,4), -- Usuário 2 está seguindo o perfil de id 4
+(24, "like post","2025/01/08 04:12:30", 1, 5, NULL,NULL, TRUE, NULL); -- Usuário 1, no post 5, deu um like no post
