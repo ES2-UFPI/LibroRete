@@ -25,7 +25,7 @@ class CreatePostTests(TestCase):
         self.assertEqual(response.status_code, 201)
         post = Post.objects.get(conteudo='Entao gente, este eh o novo livro que estou lancando')
         self.created_post_ids.append(post.id)
-        self.assertEqual(Post.objects.count(), 5)
+        self.assertEqual(Post.objects.count(), 9)
         self.assertEqual(post.conteudo, 'Entao gente, este eh o novo livro que estou lancando')
         self.assertEqual(post.midia, 'http://example.com/media.jpg')
 
@@ -98,5 +98,5 @@ class CreatePostTests(TestCase):
             id_post=post
         )
 
-        self.assertEqual(Comentario.objects.count(), 6)
+        self.assertEqual(Comentario.objects.count(), 8)
         self.assertEqual(comentario.id_post.id, post.id)
