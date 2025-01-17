@@ -107,7 +107,12 @@ INSERT IGNORE INTO livro (isbn, titulo, autor, genero) VALUES
 (9788525408532, 'Hamlet','W. Shakespeare', 'Tragédia'),
 (9788580864458, '1984','G. Orwell', 'Distopia'),
 (9786555600155, 'Coraline','N. Gailman', 'Terror'),
-(9788576572374, 'Duna','F. Herbert', 'Ficção Científica');
+(9788576572374, 'Duna','F. Herbert', 'Ficção Científica'),
+(9788506069790, 'A Ilha Do Tesouro','Robert Louis Stevenson', 'Romance'),
+(9788576572374, 'A Cirurgiã','Leslie Wolfe', 'Suspense'),
+(9786559575978, 'A Paciente Silenciosa','Alex Michaelides', 'Suspense'),
+(9788551002957, 'O Homem De Giz','C. J. Tudor', 'Policial'),
+(9788542226133, 'Quarta Asa','Rebecca Yarros', 'Fantasia');
 
 INSERT IGNORE INTO lista_livro (id_lista, isbn_livro) VALUES
 (435, 9786555600155), 
@@ -190,7 +195,7 @@ INSERT IGNORE INTO interacao (id, tipo, data_interacao, id_usuario, id_post, id_
 (8, "seguir perfil", "2024/12/20 20:55:05", 1, NULL, NULL,FALSE,NULL,2), -- Usuário 1 está seguindo o perfil de id 2
 (9, "criar post", "2025/01/01 14:04:00", 1, 3,NULL,NULL,FALSE,NULL), -- Usuario 1 criou o post 3
 (10, "criar post", "2025/01/02 15:10:21", 1, 4,NULL,NULL,FALSE,NULL), -- Usuario 1 criou o post 4
-(11, "criar post", "2025/01/07 10:23:50",2,5,NULL,NULL,FALSE,NULL), -- Usuário 2 criou o post 5             !@#@#$#$#$#$
+(11, "criar post", "2025/01/07 10:23:50",2,5,NULL,NULL,FALSE,NULL), -- Usuário 2 criou o post 5         
 (12, "criar post", "2025/01/10 20:43:12",2,6,NULL,NULL,FALSE,NULL), -- Usuario 2 criou o post 6
 (13, "criar comentario", "2025/01/07 14:05:04", 1, 5, 6,NULL,FALSE,NULL), -- Usuario 1, no post 5, criou o comentario 6
 (14, "criar comentario", "2025/01/11 12:32:23", 1, 6, 7,NULL,FALSE,NULL), -- Usuario 1, no post 6, criou o comentario 7
