@@ -23,7 +23,24 @@ def get_by_nick(request, nick):
     perfil = mdl.Perfil.objects.get(id_usuario_perfil=usuario.id)
     serializer = srl.PerfilSerializer(perfil)
 
-    return Response(serializer.data)
+    interacoes_numero_seguidores = mdl.Interacao.objects.filter(tipo="seguir perfil", id_perfil_seguir=perfil.id)
+    interacoes_numero_seguindo = mdl.Interacao.objects.filter(tipo="seguir perfil", id_usuario=usuario.id)
+    interacoes_numero_posts = mdl.Interacao.objects.filter(tipo="criar post", id_usuario=usuario.id)
+
+    interacoes = mdl.Interacao.objects.filter(tipo="criar post", id_usuario=usuario.id)
+
+
+    return Response({
+        "numero_seguidores": interacoes_numero_seguidores.count(),
+        "numero_seguindo": interacoes_numero_seguindo.count(),
+        "numero_posts": interacoes_numero_posts.count(),
+        "bio": perfil.bio,
+        "nome": usuario.nome,
+        "foto": usuario.foto,
+        "username": usuario.username,
+        "nome": usuario.nome,
+        "interesses": perfil.interesses
+    })
 
 
 @api_view(['GET'])
