@@ -6,6 +6,7 @@ from django.db.models import Q
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+from . import utils as u
 from . import serializers as srl
 from . import models as mdl
 
@@ -22,7 +23,24 @@ def get_by_nick(request, nick):
     perfil = mdl.Perfil.objects.get(id_usuario_perfil=usuario.id)
     serializer = srl.PerfilSerializer(perfil)
 
-    return Response(serializer.data)
+    interacoes_numero_seguidores = mdl.Interacao.objects.filter(tipo="seguir perfil", id_perfil_seguir=perfil.id)
+    interacoes_numero_seguindo = mdl.Interacao.objects.filter(tipo="seguir perfil", id_usuario=usuario.id)
+    interacoes_numero_posts = mdl.Interacao.objects.filter(tipo="criar post", id_usuario=usuario.id)
+
+    interacoes = mdl.Interacao.objects.filter(tipo="criar post", id_usuario=usuario.id)
+
+
+    return Response({
+        "numero_seguidores": interacoes_numero_seguidores.count(),
+        "numero_seguindo": interacoes_numero_seguindo.count(),
+        "numero_posts": interacoes_numero_posts.count(),
+        "bio": perfil.bio,
+        "nome": usuario.nome,
+        "foto": usuario.foto,
+        "username": usuario.username,
+        "nome": usuario.nome,
+        "interesses": perfil.interesses
+    })
 
 
 @api_view(['GET'])
@@ -317,3 +335,26 @@ def create_post(request):
 
     serializer = srl.PostSerializer(novo_post)
     return Response(serializer.data, status=201)
+
+@api_view(['GET'])
+def get_users_by_user_top_tags(request, nick):
+    try:
+        tag_counts = u.count_user_tag_interactions(nick)
+        
+        if isinstance(tag_counts, dict) and "erro" in tag_counts:
+            return Response(tag_counts, status=404)
+        
+        top_tags = [tag['tag'] for tag in tag_counts['tag_interactions'][:2]]
+        
+        usuario_atual = mdl.Usuario.objects.get(username=nick)
+
+        users = mdl.Usuario.objects.filter(interacao__id_post__posttag__nome_tag__in=top_tags).exclude(id=usuario_atual.id).distinct()
+        
+        serializer = srl.UsuarioSerializer(users, many=True)
+        
+        return Response(serializer.data, status=200)
+        
+    except mdl.Usuario.DoesNotExist:
+        return Response({"erro": "Usuário não encontrado"}, status=404)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar usuários: {str(e)}"}, status=500)
