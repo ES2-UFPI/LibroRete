@@ -85,10 +85,10 @@ CREATE TABLE IF NOT EXISTS post_tag(
 );
 
 INSERT IGNORE INTO usuario (id, nome, username, email, senha, foto) VALUES 
-(1, 'maria eduarda', '@eduarda', 'eduarda@gmail.com','2b869053f31a34090f3a8f14cbc73fb5b9cdde56604379c30a11b9b6f43203a4', 'https://png.pngtree.com/png-clipart/20230308/ourlarge/pngtree-cute-cat-sticker-cartoon-kitty-kitten-png-image_6635310.png'),
-(2, 'guilherme mancini', '@mancini', 'mancini@gmail.com','85e7613fc5c2e438bda561c68d9899cf3f648badaa558b01417630f06cf104c1', 'https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/391.png'),
-(3, 'laila teixeira', '@laila', 'laila@gmail.com', '45h3453774c5c2e438bda561c58d9899c43f648b3daa558b02417630f061f104c2','https://pub-static.fotor.com/assets/projects/pages/d5bdd0513a0740a8a38752dbc32586d0/fotor-03d1a91a0cec4542927f53c87e0599f6.jpg'),
-(4, 'ygor francisco', '@ygor', 'ygor@gmail.com','123456789ab5de2e438bda561c58d9899c43f648b3daa558b02417630f061f104c2','https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTb0Zcycgq7wKymbe-jMm8Jadi6-_c6sc0WBA&s');
+(1, 'Maria Eduarda', '@eduarda', 'eduarda@gmail.com','2b869053f31a34090f3a8f14cbc73fb5b9cdde56604379c30a11b9b6f43203a4', 'https://png.pngtree.com/png-clipart/20230308/ourlarge/pngtree-cute-cat-sticker-cartoon-kitty-kitten-png-image_6635310.png'),
+(2, 'Guilherme Mancini', '@mancini', 'mancini@gmail.com','85e7613fc5c2e438bda561c68d9899cf3f648badaa558b01417630f06cf104c1', 'https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/391.png'),
+(3, 'Laila Teixeira', '@laila', 'laila@gmail.com', '45h3453774c5c2e438bda561c58d9899c43f648b3daa558b02417630f061f104c2','https://pub-static.fotor.com/assets/projects/pages/d5bdd0513a0740a8a38752dbc32586d0/fotor-03d1a91a0cec4542927f53c87e0599f6.jpg'),
+(4, 'Ygor Francisco', '@ygor', 'ygor@gmail.com','123456789ab5de2e438bda561c58d9899c43f648b3daa558b02417630f061f104c2','https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTb0Zcycgq7wKymbe-jMm8Jadi6-_c6sc0WBA&s');
 
 INSERT IGNORE INTO perfil (id, bio, interesses, id_usuario_perfil) VALUES
 (1, 'Idade: 28 anos Profissão: Desenvolvedor de Software | Pronome: Ela/Dela', 'Amante de livros 📚 | Viajante por mundos imaginários e histórias inesquecíveis ✨ | Sempre em busca da próxima página para virar 📖 | Compartilhando paixões literárias e explorando universos através das palavras 🌍📕', 1),
@@ -187,25 +187,27 @@ INSERT IGNORE INTO post_tag (id_post, nome_tag) VALUES
 
 INSERT IGNORE INTO interacao (id, tipo, data_interacao, id_usuario, id_post, id_comentario,id_comentario_respondido, curtida, id_perfil_seguir) VALUES
 (1, "criar post", "2024/12/13 12:13:34", 1, 1, NULL,NULL, FALSE, NULL), -- Usuario 1 criou o post 1
-(3, "criar comentario", "2024/12/13 16:34:01", 2, 1, 1, NULL, FALSE, NULL), -- Usuario 2, no post 1, criou o comentário 1
-(4, "like post","2024/12/13 17:43:10", 2, 1, NULL,NULL, TRUE, NULL), -- Usuário 2, no post 1, deu um like no post
-(5, "criar comentario", "2024/12/13 18:12:21", 1, 1, 3, NULL, FALSE, NULL), -- Usuário 1, no post 1, criou o comentário 3
-(6, "responder comentario", "2024/12/13 18:12:21", 1, 1, 3, 1, FALSE, NULL), -- Usuario 1, no post 1, com o comentário 3 respondeu o comentário 1
-(7, "like comentario", "2024/12/13 19:35:05", 2, 1, 3, NULL, TRUE, NULL), -- Usuário 2, no post 1, deu um like no comentário 3
-(8, "seguir perfil", "2024/12/20 20:55:05", 1, NULL, NULL,FALSE,NULL,2), -- Usuário 1 está seguindo o perfil de id 2
-(9, "criar post", "2025/01/01 14:04:00", 1, 3,NULL,NULL,FALSE,NULL), -- Usuario 1 criou o post 3
-(10, "criar post", "2025/01/02 15:10:21", 1, 4,NULL,NULL,FALSE,NULL), -- Usuario 1 criou o post 4
-(11, "criar post", "2025/01/07 10:23:50",2,5,NULL,NULL,FALSE,NULL), -- Usuário 2 criou o post 5         
-(12, "criar post", "2025/01/10 20:43:12",2,6,NULL,NULL,FALSE,NULL), -- Usuario 2 criou o post 6
-(13, "criar comentario", "2025/01/07 14:05:04", 1, 5, 6,NULL,FALSE,NULL), -- Usuario 1, no post 5, criou o comentario 6
-(14, "criar comentario", "2025/01/11 12:32:23", 1, 6, 7,NULL,FALSE,NULL), -- Usuario 1, no post 6, criou o comentario 7
-(15, "criar post", "2025/01/09 14:50:12", 4, 7,NULL,NULL,FALSE,NULL), -- Usuario 4, criou o post 7
-(16, "criar post", "2025/01/08 12:06:14", 3, 8,NULL,NULL,FALSE,NULL), -- Usuario 3, criou o post 8
-(17, "seguir perfil", "2025/01/01 12:55:10", 3, NULL, NULL,FALSE,NULL,4), -- Usuário 3 está seguindo o perfil de id 4
-(18, "seguir perfil", "2025/01/01 13:03:00", 4, NULL, NULL,FALSE,NULL,3), -- Usuário 4 está seguindo o perfil de id 3
-(19, "like post","2025/01/10 17:12:05", 3, 8, NULL,NULL, TRUE, NULL), -- Usuário 3, no post 8, deu um like no post
-(20, "like post","2025/01/11 20:30:10", 4, 7, NULL,NULL, TRUE, NULL), -- Usuário 4, no post 7, deu um like no post
-(21, "seguir perfil", "2025/01/09 13:44:10", 2, NULL, NULL,FALSE,NULL,1), -- Usuário 2 está seguindo o perfil de id 1
-(22, "seguir perfil", "2025/01/04 11:32:03", 2, NULL, NULL,FALSE,NULL,3), -- Usuário 2 está seguindo o perfil de id 3
-(23, "seguir perfil", "2025/01/03 19:15:02", 2, NULL, NULL,FALSE,NULL,4), -- Usuário 2 está seguindo o perfil de id 4
-(24, "like post","2025/01/08 04:12:30", 1, 5, NULL,NULL, TRUE, NULL); -- Usuário 1, no post 5, deu um like no post
+(2, "criar comentario", "2024/12/13 16:34:01", 2, 1, 1, NULL, FALSE, NULL), -- Usuario 2, no post 1, criou o comentário 1
+(3, "like post","2024/12/13 17:43:10", 2, 1, NULL,NULL, TRUE, NULL), -- Usuário 2, no post 1, deu um like no post
+(4, "criar comentario", "2024/12/13 18:12:21", 1, 1, 3, NULL, FALSE, NULL), -- Usuário 1, no post 1, criou o comentário 3
+(5, "responder comentario", "2024/12/13 18:12:21", 1, 1, 3, 1, FALSE, NULL), -- Usuario 1, no post 1, com o comentário 3 respondeu o comentário 1
+(6, "like comentario", "2024/12/13 19:35:05", 2, 1, 3, NULL, TRUE, NULL), -- Usuário 2, no post 1, deu um like no comentário 3
+(7, "seguir perfil", "2024/12/20 20:55:05", 1, NULL, NULL,NULL,FALSE,2), -- Usuário 1 está seguindo o perfil de id 2
+(8, "criar post", "2025/01/01 14:04:00", 1, 3,NULL,NULL,FALSE,NULL), -- Usuario 1 criou o post 3
+(9, "criar post", "2025/01/02 15:10:21", 1, 4,NULL,NULL,FALSE,NULL), -- Usuario 1 criou o post 4
+(10, "criar post", "2025/01/07 10:23:50",2,5,NULL,NULL,FALSE,NULL), -- Usuário 2 criou o post 5         
+(11, "criar post", "2025/01/10 20:43:12",2,6,NULL,NULL,FALSE,NULL), -- Usuario 2 criou o post 6
+(12, "criar comentario", "2025/01/07 14:05:04", 1, 5, 6,NULL,FALSE,NULL), -- Usuario 1, no post 5, criou o comentario 6
+(13, "criar comentario", "2025/01/11 12:32:23", 1, 6, 7,NULL,FALSE,NULL), -- Usuario 1, no post 6, criou o comentario 7
+(14, "criar post", "2025/01/09 14:50:12", 4, 7,NULL,NULL,FALSE,NULL), -- Usuario 4, criou o post 7
+(15, "criar post", "2025/01/08 12:06:14", 3, 8,NULL,NULL,FALSE,NULL), -- Usuario 3, criou o post 8
+(16, "seguir perfil", "2025/01/01 12:55:10", 3, NULL, NULL,NULL,FALSE,4), -- Usuário 3 está seguindo o perfil de id 4
+(17, "seguir perfil", "2025/01/01 13:03:00", 4, NULL, NULL,NULL,FALSE,3), -- Usuário 4 está seguindo o perfil de id 3
+(18, "like post","2025/01/10 17:12:05", 3, 8, NULL,NULL, TRUE, NULL), -- Usuário 3, no post 8, deu um like no post
+(19, "like post","2025/01/11 20:30:10", 4, 7, NULL,NULL, TRUE, NULL), -- Usuário 4, no post 7, deu um like no post
+(20, "seguir perfil", "2025/01/09 13:44:10", 2, NULL, NULL,NULL,FALSE,1), -- Usuário 2 está seguindo o perfil de id 1
+(21, "seguir perfil", "2025/01/04 11:32:03", 2, NULL, NULL,NULL,FALSE,3), -- Usuário 2 está seguindo o perfil de id 3
+(22, "seguir perfil", "2025/01/03 19:15:02", 2, NULL, NULL,NULL,FALSE,4), -- Usuário 2 está seguindo o perfil de id 4
+(23, "like post","2025/01/08 04:12:30", 1, 5, NULL,NULL, TRUE, NULL), -- Usuário 1, no post 5, deu um like no post
+(24, "seguir perfil", "2025/01/09 10:02:03", 3, NULL, NULL,NULL,FALSE,1), -- Usuário 3 está seguindo o perfil de id 1
+(25, "seguir perfil", "2025/01/10 03:05:02", 4, NULL, NULL,NULL,FALSE,1); -- Usuário 4 está seguindo o perfil de id 1
