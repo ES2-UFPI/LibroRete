@@ -214,6 +214,26 @@ def get_post_usuario(request, nick):
     except Exception as e:
         return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
 
+@api_view(['GET'])
+def get_posts_feed(request, nick):
+    try:
+        usuario = mdl.Usuario.objects.get(username=nick)
+        
+        # Buscar posts dos usuarios seguidos
+        seguindo = mdl.Interacao.objects.filter(id_usuario = usuario.id, tipo = 'seguir perfil')
+        posts_feed = []
+        for amigo in seguindo:
+            perfil_amigo = amigo.id_perfil_seguir
+            posts_amigo = mdl.Interacao.objects.filter(id_usuario=perfil_amigo.id_usuario_perfil, tipo = 'criar post')
+            for post in posts_amigo:
+                serializer = srl.PostSerializer(post.id_post)
+                posts_feed.append(serializer.data)
+        
+        return Response(posts_feed, status=200)
+    except mdl.Usuario.DoesNotExist:
+        return Response({"erro": "Usuário não encontrado."}, status=404)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
 # http://localhost:8000/api/buscar-usuarios/?nome=Maria&username=eduarda
 # http://localhost:8000/api/buscar-usuarios/?nome=Mancini&username=mancini
 # http://localhost:8000/api/buscar-usuarios/?email=eduarda@gmail.com
