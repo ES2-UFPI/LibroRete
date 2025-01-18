@@ -226,7 +226,7 @@ def get_posts_feed(request, nick):
             perfil_amigo = amigo.id_perfil_seguir
             posts_amigo = mdl.Interacao.objects.filter(id_usuario=perfil_amigo.id_usuario_perfil, tipo = 'criar post')
             for post in posts_amigo:
-                serializer = srl.PostSerializer(post)
+                serializer = srl.PostSerializer(post.id_post)
                 posts_feed.append(serializer.data)
         
         return Response(posts_feed, status=200)
