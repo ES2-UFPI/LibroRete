@@ -16,4 +16,5 @@ urlpatterns = [
     path('posts-seguindo/feed/<str:nick>', views.get_posts_feed, name='posts_seguindo_feed'),
     path('posts-recomendados/feed/<str:nick>', views.get_posts_by_user_top_tags, name='posts_recomendados_feed'),
     path('posts/feed/<str:nick>', views.combined_feed, name='posts_combinado_recomendados_seguindo_feed'),
+    path('livros-recom/<str:nick>/', views.get_books_by_user_top_tags, name='livros_recom'),
     ]
