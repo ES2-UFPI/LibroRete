@@ -11,6 +11,7 @@ urlpatterns = [
     path('novo-post/', views.create_post, name='criar_post'),
     path('posts/', views.get_all_posts, name='posts'),
     path('posts/<str:nick>', views.get_post_usuario, name='post_usuario'),
-    path('posts/feed/<str:nick>', views.get_posts_feed, name='feed'), #usar esse endpoint para mostrar feed tanto recomendaçoes como seguindo.
     path('posts/top-tags/<str:username>/', views.get_users_by_user_top_tags, name='posts_top_tags'),
+    path('posts-seguindo/feed/<str:nick>', views.get_posts_feed, name='posts_seguindo_feed'),
+    path('livros-recom/<str:nick>/', views.get_books_by_user_top_tags, name='livros_recom'),
     ]
