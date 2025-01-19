@@ -56,6 +56,31 @@ img {
   gap: 30px;
 }
 
+.info-interaction {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  align-items: center;
+}
+
+.interaction {
+  cursor: pointer;
+}
+
+.interaction:hover {
+  color: #b8a28e;
+  border-color: #a38d78;
+}
+
+.interaction:active {
+  color: #a38d78;
+  transform: scale(0.98);
+}
+
+.num_interactions {
+  font-weight: 600;
+}
+
 .text {
   display: flex;
   flex-direction: row;

@@ -1,0 +1,48 @@
+.modal-share {
+  display: flex;
+  flex-direction: column;
+  background: #faf7f4;
+  padding: 20px;
+  border-radius: 8px;
+  width: 30%;
+}
+
+.modal-share-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-share-content {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.fa-cog {
+  animation: spin 3s linear infinite;
+}
+
+@media (max-width: 900px) {
+  .modal-share {
+    width: 50%;
+  }
+}
+
+@media (max-width: 500px) {
+  .modal-share {
+    width: 70%;
+  }
+}
