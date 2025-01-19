@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from . import utils as u
 from . import serializers as srl
 from . import models as mdl
+from django.http import HttpRequest
 
 
 @api_view(['GET'])
@@ -108,13 +109,19 @@ def create_interaction(request):
     try:
         # Obter dados do request
         tipo = request.data.get('tipo')
+        
         id_usuario = request.data.get('id_usuario')
+        id_perfil_seguir = request.data.get('id_perfil_seguir')
+
         id_post = request.data.get('id_post')
+        conteudo_post = request.data.get('conteudo_post')
+        midia = request.data.get('midia')
+
+        curtida = request.data.get('curtida')
+
         id_comentario = request.data.get('id_comentario')
         id_comentario_respondido = request.data.get('id_comentario_respondido')
         id_comentario_pai = request.data.get('id_comentario_pai')
-        curtida = request.data.get('curtida')
-        id_perfil_seguir = request.data.get('id_perfil_seguir')
         conteudo_comentario = request.data.get('conteudo_comentario')
 
         # Criando e validando id da nova interacao
@@ -125,10 +132,22 @@ def create_interaction(request):
                 break
 
         data = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+        data = timezone.now()
 
         # Validar inexistência da interação
-        if mdl.Interacao.objects.filter(tipo=tipo, id_usuario=id_usuario, id_post=id_post).exists():
-            return Response({"erro": "Interação já existe"}, status=400)
+        if tipo == 'like post':
+            if mdl.Interacao.objects.filter(id_usuario=id_usuario, id_post=id_post).exists():
+                return Response({"erro": "Usuário já deu like nesse post"}, status=400)
+            
+        if tipo == 'like comentario':
+            if mdl.Interacao.objects.filter(id_usuario=id_usuario, id_post=id_post, id_comentario=id_comentario, id_comentario_respondido=id_comentario_pai).exists():
+                return Response({"erro": "Usuário já deu like nesse comentário"}, status=400)
+
+        if tipo == 'seguir perfil':
+            if mdl.Interacao.objects.filter(id_usuario=id_usuario, id_perfil_seguir=id_perfil_seguir).exists():
+                return Response({"erro": "Usuário já segue este perfil"}, status=400)
+
+
 
         # Validar tipo de interação
         tipos_validos = ['criar post', 'criar comentario', 'like post', 'like comentario', 'responder comentario', 'seguir perfil']
@@ -151,7 +170,11 @@ def create_interaction(request):
         else:
             post = None
 
+
+
+        #
         # Criar novo comentário se o tipo for 'criar comentario' ou 'responder comentario'
+        #
         if (tipo == 'criar comentario' or tipo == 'responder comentario') and id_post != None:
             if not conteudo_comentario:
                 return Response({"erro": "Conteúdo do comentário é obrigatório."}, status=400)
@@ -182,6 +205,8 @@ def create_interaction(request):
 
             if tipo == 'responder comentario':
                 id_comentario_respondido = comentario_pai.id
+
+
 
         # Validar existência do comentário, se aplicável
         if id_comentario:
@@ -292,7 +317,7 @@ def get_post_usuario(request, nick):
         # Serializar os posts relacionados
         posts_user = []
         for interacao in interacoes:
-            if interacao.id_post:  # Certificar que a interação possui um post
+            if (interacao.id_post):  # Certificar que a interação possui um post
                 post = interacao.id_post  # Já é um objeto Post pela relação ForeignKey
                 serializer = srl.PostSerializer(post)
                 posts_user.append(serializer.data)  # Adicionar o JSON do post à lista
@@ -406,14 +431,6 @@ def create_post(request):
             validate(midia)
         except ValidationError:
             return Response({"erro": "URL da mídia é inválida."}, status=400)
-
-    if data:
-        try:
-            data_criacao = timezone.datetime.strptime(data, "%Y-%m-%d %H:%M:%S")
-        except ValueError:
-            return Response({"erro": "Data deve estar no formato '%Y-%m-%d %H:%M:%S'."}, status=400)
-    else:
-        data = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
 
     try:
         novo_post = mdl.Post(
