@@ -1,0 +1,50 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-post {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  background: #faf7f4;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.modal-post-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.modal-post-content {
+  color: black;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-close {
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .modal-post {
+    width: 50%;
+  }
+}
+
+@media (max-width: 500px) {
+  .modal-post {
+    width: 70%;
+  }
+}
