@@ -74,9 +74,6 @@ def get_user_lists(request, nick):
             # Tabela virtual JOIN de ListaLivro e Livro
             tabela_virtual = listalivro.select_related('isbn_livro')
 
-            # print(tabela_virtual)
-            # Criar lista apenas com os títulos dos livros
-
             livros_da_lista = tabela_virtual.values_list('isbn_livro__titulo')
 
             livros_da_lista_google = tabela_virtual.values_list('isbn_livro__titulo','isbn_livro__isbn')
@@ -94,11 +91,6 @@ def get_user_lists(request, nick):
                 descricao = volume_info.get("description", "Descrição não disponível")
                 foto = volume_info.get("imageLinks", "Imagem não encontrado")
 
-                # print(f"Título: {titulo}")
-                # print(f"Autores: {', '.join(autores)}")
-                # print(f"Data de Publicação: {data_publicacao}")
-                # print(f"Descrição: {descricao}")
-                # print(f"Foto: {foto}")
 
                 dicionario = {'titulo': titulo, 'autor': autores, 'data_publicacao': data_publicacao, 'descricao': descricao, 'foto': foto}
                 arr.append(dicionario)
@@ -107,6 +99,7 @@ def get_user_lists(request, nick):
 
             result.append({ 
                 'lista': lista.nome,
+                'descricao': lista.descricao,
                 'livros': list(livros_da_lista),
                 'livrosAPIGoogle': arr
             }) 
