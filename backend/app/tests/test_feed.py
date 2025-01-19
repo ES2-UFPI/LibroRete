@@ -4,10 +4,10 @@ from api.models import Usuario, Post, Comentario, Interacao, Perfil
 
 class FeedTest(TestCase):
 
-    def test_get_posts_fedd(self):
+    def test_get_posts_feed(self):
         response = self.client.get("/api/posts-seguindo/feed/@eduarda")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['feed_posts'], [
+        self.assertEqual(response.json(), [
             {
                 "id": 5,
                 "conteudo": "Ler crônicas nunca é demais 😎",
