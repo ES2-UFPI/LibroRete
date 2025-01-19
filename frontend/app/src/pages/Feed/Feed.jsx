@@ -20,9 +20,8 @@ function Feed() {
         {navItems.map(item => (
           <Link
             to={item.path}
-            className={`feed-nav-item ${
-              location.pathname === item.path ? 'active' : ''
-            }`}
+            className={`feed-nav-item ${location.pathname === item.path ? 'active' : ''
+              }`}
           >
             {item.icon}
           </Link>

@@ -76,29 +76,28 @@ input[type='radio'] {
   font-size: 0.9rem;
 }
 
-input[type='file'] {
-  display: none;
+#fileInput {
+  padding: 10px 20px;
+  border-radius: 5px;
+  background-color: #f2eae0;
 }
+
+/* input[type='file'] {
+  display: none;
+} */
 
 .media-text label.file-button {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
   gap: 5px;
-  padding: 10px 20px;
   font-size: 0.9rem;
   font-weight: 500;
-  cursor: pointer;
-  border-radius: 5px;
-  border: 2px solid transparent;
-  background-color: #f2eae0;
-  transition: all 0.2s ease;
 }
 
-.media-text label.file-button:hover {
+/* .media-text label.file-button:hover {
   border: 2px solid #4b3f2f;
-}
+} */
 
 .media-text img {
   height: auto;

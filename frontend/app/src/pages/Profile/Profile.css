@@ -49,10 +49,12 @@
 .ProfileContent {
   max-width: 600px;
   flex: 1;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   margin: 0px 10px;
   gap: 30px;
+  scrollbar-width: none;
 }
 
 .bar {
@@ -81,6 +83,9 @@
 }
 
 .profile-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   color: #b5afa8;
 }

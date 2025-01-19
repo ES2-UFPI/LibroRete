@@ -1,4 +1,5 @@
 import './CriaPost.css'
+import axios from 'axios'
 import { React, useState } from 'react'
 
 import { CiImageOn } from 'react-icons/ci'
@@ -27,22 +28,42 @@ function CriaPost() {
     setFormData({ ...formData, type: value })
   }
 
-  const handleFileChange = e => {
-    const file = e.target.files[0]
+  // const handleFileChange = e => {
+  //   const file = e.target.files[0]
 
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setFormData({ ...formData, media: reader.result })
-      }
-      reader.readAsDataURL(file)
-    }
-  }
+  //   if (file && file.type.startsWith('image/')) {
+  //     const reader = new FileReader()
+  //     reader.onloadend = () => {
+  //       setFormData({ ...formData, media: reader.result })
+  //     }
+  //     reader.readAsDataURL(file)
+  //   }
+  // }
 
   const handleSubmit = e => {
     e.preventDefault()
-    console.log('Form Data:', formData)
-    alert(`Type: ${formData.type}, Caption: ${formData.caption_create}`)
+
+    const json_post = {
+      conteudo: formData.caption_create,
+      midia: formData.media,
+      id_usuario: 1,
+      data: '',
+    }
+
+    axios
+      .post('http://localhost:8000/api/novo-post/', json_post, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(response => {
+        console.log('Response:', response.data)
+        alert('Post enviado com sucesso!')
+      })
+      .catch(error => {
+        console.error('Erro ao enviar o post:', error)
+        alert('Erro ao enviar o post:', error)
+      })
   }
 
   return (
@@ -82,14 +103,15 @@ function CriaPost() {
         <div className="media-text">
           <p className="label-info">Upload de mídia</p>
           <label htmlFor="fileInput" className="file-button">
-            <IoIosCamera size={20} /> Escolher foto
+            <IoIosCamera size={20} /> Insira a url para ver a prévia
           </label>
           <input
-            type="file"
+            type="text"
             id="fileInput"
             name="media"
-            accept="image/*"
-            onChange={handleFileChange}
+            value={formData.media || ''}
+            onChange={handleChange}
+            placeholder="Cole o link da imagem aqui..."
           />
 
           {formData.media ? (

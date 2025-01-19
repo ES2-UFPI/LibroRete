@@ -1,0 +1,25 @@
+.ProfilePostContent {
+  width: 100%;
+  padding: 20px;
+  background-color: #faf7f4;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.profile-posts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+  align-items: center;
+  gap: 16px;
+}
+
+@media (max-width: 470px) {
+  .profile-posts {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ProfilePostContent {
+    padding: 10px;
+  }
+}
