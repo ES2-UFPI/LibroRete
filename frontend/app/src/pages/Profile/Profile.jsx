@@ -13,30 +13,30 @@ import { Link, useLocation } from 'react-router-dom'
 function Profile() {
   const location = useLocation()
   const [data, setData] = useState([])
-  // const [erro, setError] = useState(null)
-  // const [loading, setLoading] = useState(true)
+  const [erro, setError] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  const my_profile = {
-    bio: 'aaaaaaaaaa',
-    interesses: 'aaaaaaaaa',
-  }
+  // const data = {
+  //   bio: 'aaaaaaaaaa',
+  //   interesses: 'aaaaaaaaa',
+  // }
 
-  // useEffect(() => {
-  //   axios
-  //     .get('http://localhost:8000/api/perfis/@eduarda?format=json')
-  //     .then(response => {
-  //       console.log('Raw Response:', response.data)
-  //       setData(response.data)
-  //       setLoading(false)
-  //     })
-  //     .catch(error => {
-  //       setError(error)
-  //       setLoading(false)
-  //     })
-  // }, [])
+  useEffect(() => {
+    axios
+      .get('http://localhost:8000/api/perfis/@eduarda?format=json')
+      .then(response => {
+        console.log('Raw Response:', response.data)
+        setData(response.data)
+        setLoading(false)
+      })
+      .catch(error => {
+        setError(error)
+        setLoading(false)
+      })
+  }, [])
 
-  // if (loading) return <div>Carregando ...</div>
-  // if (erro) return <div>Erro ao carregar os dados: {erro.message}</div>
+  if (loading) return <div>Carregando ...</div>
+  if (erro) return <div>Erro ao carregar os dados: {erro.message}</div>
 
   const barItems = [
     {
@@ -76,8 +76,8 @@ function Profile() {
           </div>
           <div className="info-text">
             <h3>Name</h3>
-            <p>{my_profile['bio']}</p>
-            <p>{my_profile['interesses']}</p>
+            <p>{data['bio']}</p>
+            <p>{data['interesses']}</p>
           </div>
         </div>
       </div>
