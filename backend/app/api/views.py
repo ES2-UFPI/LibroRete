@@ -432,6 +432,14 @@ def create_post(request):
         except ValidationError:
             return Response({"erro": "URL da mídia é inválida."}, status=400)
 
+    if data:
+        try:
+            data_criacao = timezone.datetime.strptime(data, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            return Response({"erro": "Data deve estar no formato '%Y-%m-%d %H:%M:%S'."}, status=400)
+    else:
+        data = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+
     try:
         novo_post = mdl.Post(
             id=id_post,
