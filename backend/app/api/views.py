@@ -1,5 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, parser_classes
+from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.db.models import Q
@@ -10,7 +11,7 @@ from . import utils as u
 from . import serializers as srl
 from . import models as mdl
 from django.http import HttpRequest
-
+import requests
 
 @api_view(['GET'])
 def get_by_nick(request, nick):
@@ -66,23 +67,83 @@ def get_user_lists(request, nick):
         # Busca todas as listas do usuário
         listas = mdl.Lista.objects.filter(id_perfil_lista=perfil.id)
         
+        
         result = []
         for lista in listas:
             # Pegar instancias de ListaLivro que possuem lista.id
             listalivro = mdl.ListaLivro.objects.filter(id_lista=lista.id)
 
-            # Tabela virtual JOIN de ListaLivro e Livro
+            c = listalivro.values_list('isbn_livro') 
+
+            arr=[]
+            lista_livro=[]
+            for i in c: 
+                # print(i[0])  
+                response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:{i[0]}")
+                #response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:9788581051031") 
+                data = response.json()
+                # print(data)
+                
+                book = data["items"][0]
+                volume_info = book["volumeInfo"] 
+
+                # titulo_api = volume_info.get("title", "Título não encontrado") 
+                titulo_api = volume_info.get("title", "Título não encontrado")
+                autores = volume_info.get("authors", [])
+                data_publicacao = volume_info.get("publishedDate", "Data não encontrada")
+                descricao = volume_info.get("description", "Descrição não disponível")
+                foto = volume_info.get("imageLinks", "Imagem não encontrado")
+                
+                # print(f"titulo_api: {titulo_api}")  
+
+                dicionario = {'titulo': titulo_api, 'autor': autores, 'data_publicacao': data_publicacao, 'descricao': descricao, 'foto': foto}
+                arr.append(dicionario)
+                lista_livro.append([titulo_api])
+
+            # Tabela virtual JOIN de ListaLivro e Livro  
             tabela_virtual = listalivro.select_related('isbn_livro')
+            # print(lista_livro)
+   
+            # for item in tabela_virtual: 
+            #     print(f"ISBN: {item}, Título: ") 
 
-            # Criar lista apenas com os títulos dos livros
-            livros_da_lista = tabela_virtual.values_list('isbn_livro__titulo', flat=True)
+            livros_da_lista = tabela_virtual.values_list('isbn_livro__titulo')
 
-            result.append({
-                'lista': lista.nome,
-                'livros': list(livros_da_lista)
-            })
+            # for item in livros_da_lista:
+            #     print(item)  
+
+            # livros_da_lista_google = tabela_virtual.values_list('isbn_livro__titulo','isbn_livro__isbn')
             
-        return Response(result)
+            # for titulo,isbn in livros_da_lista_google:
+            #     response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=intitle:{titulo}+isbn:{isbn}")
+            #     data = response.json()
+                
+            #     book = data["items"][0]
+            #     volume_info = book["volumeInfo"]
+
+            #     titulo_api = volume_info.get("title", "Título não encontrado")
+            #     autores = volume_info.get("authors", [])
+            #     data_publicacao = volume_info.get("publishedDate", "Data não encontrada")
+            #     descricao = volume_info.get("description", "Descrição não disponível")
+            #     foto = volume_info.get("imageLinks", "Imagem não encontrado")
+
+                # print(data)
+                # print(f"ISBN: ")
+
+
+                
+
+
+
+            result.append({ 
+                'lista': lista.nome,
+                'descricao': lista.descricao,
+                'livros': list(lista_livro),
+                # 'livros': list(livros_da_lista),
+                'livrosAPIGoogle': arr
+            }) 
+            
+        return Response(result)  
         
     except mdl.Usuario.DoesNotExist:
         return Response({"message": "Usuário não encontrado"}, status=404)
@@ -263,6 +324,7 @@ def create_interaction(request):
         return Response({"erro": f"Erro ao criar interação: {str(e)}"}, status=500)
 
 
+      
 # http://localhost:8000/api/buscar-livros/?autor=G&titulo=1
 # http://localhost:8000/api/buscar-livros/?autor=G
 @api_view(['GET'])
@@ -349,7 +411,7 @@ def get_posts_feed(request, nick):
         return Response({"erro": "Usuário não encontrado."}, status=404)
     except Exception as e:
         return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
-    
+
 
 # http://localhost:8000/api/buscar-usuarios/?nome=Maria&username=eduarda
 # http://localhost:8000/api/buscar-usuarios/?nome=Mancini&username=mancini
@@ -453,7 +515,7 @@ def create_post(request):
     serializer = srl.PostSerializer(novo_post)
     return Response(serializer.data, status=201)
 
-
+  
 @api_view(['GET'])
 def get_users_by_user_top_tags(request, nick):
     try:
@@ -476,6 +538,127 @@ def get_users_by_user_top_tags(request, nick):
         return Response({"erro": "Usuário não encontrado"}, status=404)
     except Exception as e:
         return Response({"erro": f"Erro ao buscar usuários: {str(e)}"}, status=500)
+    
+    
+@api_view(['GET'])
+def get_post_tags(request, post_id):
+    try:
+        post = mdl.Post.objects.get(id=post_id)
+        post_tags = mdl.PostTag.objects.filter(id_post=post)
+        tags = mdl.Tags.objects.filter(
+            nome__in=post_tags.values_list('nome_tag', flat=True)
+        )
+        return Response({
+            'tags': [tag.nome for tag in tags]
+        }, status=200)
+    except mdl.Post.DoesNotExist:
+        return Response({"erro": "Post não encontrado"}, status=404)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar tags: {str(e)}"}, status=500)
+    
+    
+@api_view(['GET'])
+def get_user_tags(request, nick):
+    try:
+        tags = u.get_user_interaction_tags(nick)
+        
+        if isinstance(tags, dict) and "erro" in tags:
+            return Response(tags, status=404)
+            
+        return Response(tags, status=200)
+        
+    except Exception as e:
+        return Response(
+            {"erro": f"Erro ao buscar tags: {str(e)}"}, 
+            status=500
+        )
+    
+    
+@api_view(['GET'])
+def get_user_tag_interactions(request, nick):
+    try:
+        tag_counts = u.count_user_tag_interactions(nick)
+        
+        if isinstance(tag_counts, dict) and "erro" in tag_counts:
+            return Response(tag_counts, status=404)
+            
+        return Response(tag_counts, status=200)
+        
+    except Exception as e:
+        return Response(
+            {"erro": f"Erro ao buscar contagem de tags: {str(e)}"}, 
+            status=500
+        )
+
+      
+@api_view(['GET'])
+def get_posts_by_user_top_tags(request, nick):
+    try:
+        tag_counts = u.count_user_tag_interactions(nick)
+
+        if isinstance(tag_counts, dict) and "erro" in tag_counts:
+            return Response(tag_counts, status=404)
+
+        top_tags = [tag['tag'] for tag in tag_counts['tag_interactions']]
+
+        usuario_atual = mdl.Usuario.objects.get(username=nick)
+
+        # Obter IDs dos posts criados pelo usuário
+        posts_criados = mdl.Interacao.objects.filter(
+            id_usuario=usuario_atual.id, tipo='criar post'
+        ).values_list('id_post', flat=True)
+
+        # Filtrar posts pelas tags e excluir os posts criados pelo usuário
+        posts = mdl.Post.objects.filter(
+            posttag__nome_tag__in=top_tags
+        ).exclude(id__in=posts_criados).distinct()
+
+        serializer = srl.PostSerializer(posts, many=True)
+
+        return Response(serializer.data, status=200)
+
+    except mdl.Usuario.DoesNotExist:
+        return Response({"erro": "Usuário não encontrado"}, status=404)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
+
+      
+@api_view(['GET'])
+def combined_feed(request, nick):
+    try:
+        # Obter posts do feed
+        usuario = mdl.Usuario.objects.get(username=nick)
+        seguindo = mdl.Interacao.objects.filter(id_usuario=usuario.id, tipo='seguir perfil')
+        posts_feed = []
+        for amigo in seguindo:
+            perfil_amigo = amigo.id_perfil_seguir
+            posts_amigo = mdl.Interacao.objects.filter(id_usuario=perfil_amigo.id_usuario_perfil, tipo='criar post')
+            for post in posts_amigo:
+                serializer = srl.PostSerializer(post.id_post)
+                posts_feed.append(serializer.data)
+
+        # Obter posts por top tags
+        tag_counts = u.count_user_tag_interactions(nick)
+        if isinstance(tag_counts, dict) and "erro" in tag_counts:
+            return Response(tag_counts, status=404)
+        top_tags = [tag['tag'] for tag in tag_counts['tag_interactions']]
+        posts_criados = mdl.Interacao.objects.filter(id_usuario=usuario.id, tipo='criar post').values_list('id_post', flat=True)
+        posts_top_tags = mdl.Post.objects.filter(posttag__nome_tag__in=top_tags).exclude(id__in=posts_criados).distinct()
+        serializer_top_tags = srl.PostSerializer(posts_top_tags, many=True)
+
+        # Combinar os resultados
+        combined_results = {
+            "feed_posts": posts_feed,
+            "top_tag_posts": serializer_top_tags.data
+        }
+
+        return Response(combined_results, status=200)
+
+    except mdl.Usuario.DoesNotExist:
+        return Response({"erro": "Usuário não encontrado"}, status=404)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
+
 
 
 @api_view(['GET'])

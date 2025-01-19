@@ -5,8 +5,8 @@ from api.models import Usuario
 class SearchUsersTests(TestCase):
     def setUp(self):
         # Crie alguns usuários de teste
-        self.usuario1 = Usuario.objects.create(id=777, nome='Raimundo Neto', username='raimundo', email='raimundo@gmail.com', senha='123', foto='foto1')
-        self.usuario2 = Usuario.objects.create(id=778, nome='Julio Balestrin', username='julio', email='julio@gmail.com', senha='456', foto='foto2')
+        self.usuario1 = Usuario.objects.create(id=777, nome='Raimundo Neto', username='@raimundo', email='raimundo@gmail.com', senha='123', foto='foto1')
+        self.usuario2 = Usuario.objects.create(id=778, nome='Julio Balestrin', username='@julio', email='julio@gmail.com', senha='456', foto='foto2')
 
     def tearDown(self):
         Usuario.objects.filter(id=777).delete()

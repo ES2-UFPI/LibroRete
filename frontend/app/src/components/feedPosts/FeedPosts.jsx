@@ -8,7 +8,9 @@ import React from 'react'
 const FeedPosts = () => {
   const posts = [
     {
-      liked: true,
+      id: '1',
+      user_id: '1',
+      liked: false,
       time: 'há 1 h',
       num_likes: 150,
       num_shares: 10,
@@ -18,6 +20,8 @@ const FeedPosts = () => {
       caption: 'Acabei de terminar esse livro incrível! 📚✨ #leituradodia',
     },
     {
+      id: '2',
+      user_id: '1',
       liked: false,
       time: 'há 2 h',
       num_likes: 50,
@@ -34,6 +38,8 @@ const FeedPosts = () => {
       {posts.map((post, index) => (
         <Post
           key={index}
+          id={post.id}
+          user_id={post.user_id}
           time={post.time}
           liked={post.liked}
           image={post.image_url}
