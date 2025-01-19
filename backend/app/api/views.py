@@ -85,14 +85,14 @@ def get_user_lists(request, nick):
                 book = data["items"][0]
                 volume_info = book["volumeInfo"]
 
-                titulo = volume_info.get("title", "Título não encontrado")
+                titulo_api = volume_info.get("title", "Título não encontrado")
                 autores = volume_info.get("authors", [])
                 data_publicacao = volume_info.get("publishedDate", "Data não encontrada")
                 descricao = volume_info.get("description", "Descrição não disponível")
                 foto = volume_info.get("imageLinks", "Imagem não encontrado")
 
 
-                dicionario = {'titulo': titulo, 'autor': autores, 'data_publicacao': data_publicacao, 'descricao': descricao, 'foto': foto}
+                dicionario = {'titulo': titulo_api, 'autor': autores, 'data_publicacao': data_publicacao, 'descricao': descricao, 'foto': foto}
                 arr.append(dicionario)
 
 
