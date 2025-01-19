@@ -23,7 +23,24 @@ def get_by_nick(request, nick):
     perfil = mdl.Perfil.objects.get(id_usuario_perfil=usuario.id)
     serializer = srl.PerfilSerializer(perfil)
 
-    return Response(serializer.data)
+    interacoes_numero_seguidores = mdl.Interacao.objects.filter(tipo="seguir perfil", id_perfil_seguir=perfil.id)
+    interacoes_numero_seguindo = mdl.Interacao.objects.filter(tipo="seguir perfil", id_usuario=usuario.id)
+    interacoes_numero_posts = mdl.Interacao.objects.filter(tipo="criar post", id_usuario=usuario.id)
+
+    interacoes = mdl.Interacao.objects.filter(tipo="criar post", id_usuario=usuario.id)
+
+
+    return Response({
+        "numero_seguidores": interacoes_numero_seguidores.count(),
+        "numero_seguindo": interacoes_numero_seguindo.count(),
+        "numero_posts": interacoes_numero_posts.count(),
+        "bio": perfil.bio,
+        "nome": usuario.nome,
+        "foto": usuario.foto,
+        "username": usuario.username,
+        "nome": usuario.nome,
+        "interesses": perfil.interesses
+    })
 
 
 @api_view(['GET'])
@@ -197,6 +214,27 @@ def get_post_usuario(request, nick):
     except Exception as e:
         return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
 
+@api_view(['GET'])
+def get_posts_feed(request, nick):
+    try:
+        usuario = mdl.Usuario.objects.get(username=nick)
+        
+        # Buscar posts dos usuarios seguidos
+        seguindo = mdl.Interacao.objects.filter(id_usuario = usuario.id, tipo = 'seguir perfil')
+        posts_feed = []
+        for amigo in seguindo:
+            perfil_amigo = amigo.id_perfil_seguir
+            posts_amigo = mdl.Interacao.objects.filter(id_usuario=perfil_amigo.id_usuario_perfil, tipo = 'criar post')
+            for post in posts_amigo:
+                serializer = srl.PostSerializer(post.id_post)
+                posts_feed.append(serializer.data)
+        
+        return Response(posts_feed, status=200)
+    except mdl.Usuario.DoesNotExist:
+        return Response({"erro": "Usuário não encontrado."}, status=404)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
+    
 # http://localhost:8000/api/buscar-usuarios/?nome=Maria&username=eduarda
 # http://localhost:8000/api/buscar-usuarios/?nome=Mancini&username=mancini
 # http://localhost:8000/api/buscar-usuarios/?email=eduarda@gmail.com
@@ -300,30 +338,53 @@ def create_post(request):
     return Response(serializer.data, status=201)
 
 @api_view(['GET'])
-def get_books_by_user_top_tags(request, nick):
+def get_users_by_user_top_tags(request, nick):
     try:
-        # Obter todas as tags com as quais o usuário interagiu
         tag_counts = u.count_user_tag_interactions(nick)
         
         if isinstance(tag_counts, dict) and "erro" in tag_counts:
             return Response(tag_counts, status=404)
         
-        # Selecionar todas as tags
-        all_tags = [tag['tag'][1:] for tag in tag_counts['tag_interactions']]  # Remove o '#'
+        top_tags = [tag['tag'] for tag in tag_counts['tag_interactions'][:2]]
         
-        # Obter todos os gêneros disponíveis
-        all_genres = mdl.Livro.objects.values_list('genero', flat=True).distinct()
+        usuario_atual = mdl.Usuario.objects.get(username=nick)
+
+        users = mdl.Usuario.objects.filter(interacao__id_post__posttag__nome_tag__in=top_tags).exclude(id=usuario_atual.id).distinct()
         
-        # Encontrar gêneros correspondentes às tags
-        genres = [genre for genre in all_genres if any(genre.lower() in tag.lower() for tag in all_tags)]
-        
-        # Buscar livros associados aos gêneros selecionados
-        books = mdl.Livro.objects.filter(genero__in=genres).distinct()
-        
-        # Serializar os livros
-        serializer = srl.LivroSerializer(books, many=True)
+        serializer = srl.UsuarioSerializer(users, many=True)
         
         return Response(serializer.data, status=200)
         
+    except mdl.Usuario.DoesNotExist:
+        return Response({"erro": "Usuário não encontrado"}, status=404)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar usuários: {str(e)}"}, status=500)
+
+@api_view(['GET'])
+def get_books_by_user_top_tags(request, nick):
+    try:
+        # Obter todas as tags com as quais o usuário interagiu
+        tag_counts = u.count_user_tag_interactions(nick)
+
+        if isinstance(tag_counts, dict) and "erro" in tag_counts:
+            return Response(tag_counts, status=404)
+
+        # Selecionar todas as tags
+        all_tags = [tag['tag'][1:] for tag in tag_counts['tag_interactions']]  # Remove o '#'
+
+        # Obter todos os gêneros disponíveis
+        all_genres = mdl.Livro.objects.values_list('genero', flat=True).distinct()
+
+        # Encontrar gêneros correspondentes às tags
+        genres = [genre for genre in all_genres if any(genre.lower() in tag.lower() for tag in all_tags)]
+
+        # Buscar livros associados aos gêneros selecionados
+        books = mdl.Livro.objects.filter(genero__in=genres).distinct()
+
+        # Serializar os livros
+        serializer = srl.LivroSerializer(books, many=True)
+
+        return Response(serializer.data, status=200)
+
     except Exception as e:
         return Response({"erro": f"Erro ao buscar livros: {str(e)}"}, status=500)

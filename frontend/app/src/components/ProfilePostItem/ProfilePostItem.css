@@ -1,0 +1,32 @@
+.profile-post-img {
+  width: 150px;
+  height: 150px;
+}
+
+@media (max-width: 600px) {
+  .profile-post-img {
+    width: 130px;
+    height: 130px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-post-img {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+@media (max-width: 465px) {
+  .profile-post-img {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+@media (max-width: 365px) {
+  .profile-post-img {
+    width: 130px;
+    height: 130px;
+  }
+}
