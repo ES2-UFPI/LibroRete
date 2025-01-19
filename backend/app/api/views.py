@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from . import utils as u
 from . import serializers as srl
 from . import models as mdl
-
+import requests
 
 @api_view(['GET'])
 def get_by_nick(request, nick):
@@ -64,6 +64,7 @@ def get_user_lists(request, nick):
         
         # Busca todas as listas do usuário
         listas = mdl.Lista.objects.filter(id_perfil_lista=perfil.id)
+        print("d")
         
         result = []
         for lista in listas:
@@ -73,15 +74,44 @@ def get_user_lists(request, nick):
             # Tabela virtual JOIN de ListaLivro e Livro
             tabela_virtual = listalivro.select_related('isbn_livro')
 
+            # print(tabela_virtual)
             # Criar lista apenas com os títulos dos livros
-            livros_da_lista = tabela_virtual.values_list('isbn_livro__titulo', flat=True)
 
-            result.append({
+            livros_da_lista = tabela_virtual.values_list('isbn_livro__titulo')
+
+            livros_da_lista_google = tabela_virtual.values_list('isbn_livro__titulo','isbn_livro__isbn')
+            arr=[]
+            for titulo, isbn in livros_da_lista_google:
+                response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}")
+                data = response.json()
+                
+                book = data["items"][0]
+                volume_info = book["volumeInfo"]
+
+                titulo = volume_info.get("title", "Título não encontrado")
+                autores = volume_info.get("authors", [])
+                data_publicacao = volume_info.get("publishedDate", "Data não encontrada")
+                descricao = volume_info.get("description", "Descrição não disponível")
+                foto = volume_info.get("imageLinks", "Imagem não encontrado")
+
+                # print(f"Título: {titulo}")
+                # print(f"Autores: {', '.join(autores)}")
+                # print(f"Data de Publicação: {data_publicacao}")
+                # print(f"Descrição: {descricao}")
+                # print(f"Foto: {foto}")
+
+                dicionario = {'titulo': titulo, 'autor': autores, 'data_publicacao': data_publicacao, 'descricao': descricao, 'foto': foto}
+                arr.append(dicionario)
+
+
+
+            result.append({ 
                 'lista': lista.nome,
-                'livros': list(livros_da_lista)
-            })
+                'livros': list(livros_da_lista),
+                'livrosAPIGoogle': arr
+            }) 
             
-        return Response(result)
+        return Response(result)  
         
     except mdl.Usuario.DoesNotExist:
         return Response({"message": "Usuário não encontrado"}, status=404)
