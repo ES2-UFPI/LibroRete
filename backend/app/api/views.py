@@ -102,6 +102,10 @@ def create_interaction(request):
         tipo = request.data.get('tipo')
         id_usuario = request.data.get('id_usuario')
         id_post = request.data.get('id_post')
+        id_comentario = request.data.get('id_comentario')
+        id_comentario_respondido = request.data.get('id_comentario_respondido')
+        curtida = request.data.get('curtida')
+        id_perfil_seguir = request.data.get('id_perfil_seguir')
 
         # Criando e validando id da nova interacao
         while True:
@@ -113,25 +117,55 @@ def create_interaction(request):
         data = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
 
         # Validar inexistência da interação
-        if mdl.Interacao.objects.filter(tipo=tipo,id_usuario=id_usuario,id_post=id_post).exists():
+        if mdl.Interacao.objects.filter(tipo=tipo, id_usuario=id_usuario, id_post=id_post).exists():
             return Response({"erro": "Interação já existe"}, status=400)
 
         # Validar tipo de interação
-        tipos_validos = ['curtir', 'comentar', 'visualizar']
+        tipos_validos = ['criar post', 'criar comentario', 'like post', 'like comentario', 'responder comentario', 'seguir perfil']
         if tipo not in tipos_validos:
-            return Response({"erro": f"Tipo de interação inválido. Tipos válidos: {tipos_validos}"},status=400)
+            return Response({"erro": f"Tipo de interação inválido. Tipos válidos: {tipos_validos}"}, status=400)
 
         # Validar existência do usuário
         try:
             usuario = mdl.Usuario.objects.get(id=id_usuario)
         except mdl.Usuario.DoesNotExist:
-            return Response({"erro": "Usuário não encontrado"},status=404)
+            return Response({"erro": "Usuário não encontrado"}, status=404)
 
-        # Validar existência do post
-        try:
-            post = mdl.Post.objects.get(id=id_post)
-        except mdl.Post.DoesNotExist:
-            return Response({"erro": "Post não encontrado"},status=404)
+        # Validar existência do post, se aplicável
+        if id_post:
+            try:
+                post = mdl.Post.objects.get(id=id_post)
+            except mdl.Post.DoesNotExist:
+                return Response({"erro": "Post não encontrado"}, status=404)
+        else:
+            post = None
+
+        # Validar existência do comentário, se aplicável
+        if id_comentario:
+            try:
+                comentario = mdl.Comentario.objects.get(id=id_comentario)
+            except mdl.Comentario.DoesNotExist:
+                return Response({"erro": "Comentário não encontrado"}, status=404)
+        else:
+            comentario = None
+
+        # Validar existência do comentário respondido, se aplicável
+        if id_comentario_respondido:
+            try:
+                comentario_respondido = mdl.Comentario.objects.get(id=id_comentario_respondido)
+            except mdl.Comentario.DoesNotExist:
+                return Response({"erro": "Comentário respondido não encontrado"}, status=404)
+        else:
+            comentario_respondido = None
+
+        # Validar existência do perfil a seguir, se aplicável
+        if id_perfil_seguir:
+            try:
+                perfil_seguir = mdl.Perfil.objects.get(id=id_perfil_seguir)
+            except mdl.Perfil.DoesNotExist:
+                return Response({"erro": "Perfil a seguir não encontrado"}, status=404)
+        else:
+            perfil_seguir = None
 
         # Criar nova interação
         nova_interacao = mdl.Interacao(
@@ -139,7 +173,11 @@ def create_interaction(request):
             tipo=tipo,
             data_interacao=data,
             id_usuario=usuario,
-            id_post=post
+            id_post=post,
+            id_comentario=comentario,
+            id_comentario_respondido=comentario_respondido,
+            curtida=curtida,
+            id_perfil_seguir=perfil_seguir
         )
         nova_interacao.save()
 
@@ -148,7 +186,8 @@ def create_interaction(request):
         return Response(serializer.data, status=201)
 
     except Exception as e:
-        return Response({"erro": f"Erro ao criar interação: {str(e)}"},status=500)
+        return Response({"erro": f"Erro ao criar interação: {str(e)}"}, status=500)
+
 
 # http://localhost:8000/api/buscar-livros/?autor=G&titulo=1
 # http://localhost:8000/api/buscar-livros/?autor=G
@@ -182,6 +221,7 @@ def search_books(request):
     except Exception as e:
         return Response({"erro": str(e)}, status=500)
 
+
 @api_view(['GET'])
 def get_all_posts(request):
     try:
@@ -191,7 +231,7 @@ def get_all_posts(request):
     except Exception as e:
         return Response({"erro": f"Erro ao buscar posts: {str(e)}"},status=500)
     
-      
+
 @api_view(['GET'])
 def get_post_usuario(request, nick):
     try:
@@ -214,6 +254,7 @@ def get_post_usuario(request, nick):
     except Exception as e:
         return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
 
+
 @api_view(['GET'])
 def get_posts_feed(request, nick):
     try:
@@ -235,6 +276,7 @@ def get_posts_feed(request, nick):
     except Exception as e:
         return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
     
+
 # http://localhost:8000/api/buscar-usuarios/?nome=Maria&username=eduarda
 # http://localhost:8000/api/buscar-usuarios/?nome=Mancini&username=mancini
 # http://localhost:8000/api/buscar-usuarios/?email=eduarda@gmail.com
@@ -337,6 +379,7 @@ def create_post(request):
     serializer = srl.PostSerializer(novo_post)
     return Response(serializer.data, status=201)
 
+
 @api_view(['GET'])
 def get_users_by_user_top_tags(request, nick):
     try:
@@ -359,6 +402,7 @@ def get_users_by_user_top_tags(request, nick):
         return Response({"erro": "Usuário não encontrado"}, status=404)
     except Exception as e:
         return Response({"erro": f"Erro ao buscar usuários: {str(e)}"}, status=500)
+
 
 @api_view(['GET'])
 def get_books_by_user_top_tags(request, nick):
