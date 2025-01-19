@@ -150,6 +150,7 @@ def create_interaction(request):
     except Exception as e:
         return Response({"erro": f"Erro ao criar interação: {str(e)}"},status=500)
 
+      
 # http://localhost:8000/api/buscar-livros/?autor=G&titulo=1
 # http://localhost:8000/api/buscar-livros/?autor=G
 @api_view(['GET'])
@@ -182,6 +183,7 @@ def search_books(request):
     except Exception as e:
         return Response({"erro": str(e)}, status=500)
 
+      
 @api_view(['GET'])
 def get_all_posts(request):
     try:
@@ -214,6 +216,7 @@ def get_post_usuario(request, nick):
     except Exception as e:
         return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
 
+      
 @api_view(['GET'])
 def get_posts_feed(request, nick):
     try:
@@ -234,7 +237,8 @@ def get_posts_feed(request, nick):
         return Response({"erro": "Usuário não encontrado."}, status=404)
     except Exception as e:
         return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
-    
+
+
 # http://localhost:8000/api/buscar-usuarios/?nome=Maria&username=eduarda
 # http://localhost:8000/api/buscar-usuarios/?nome=Mancini&username=mancini
 # http://localhost:8000/api/buscar-usuarios/?email=eduarda@gmail.com
@@ -337,6 +341,7 @@ def create_post(request):
     serializer = srl.PostSerializer(novo_post)
     return Response(serializer.data, status=201)
 
+ 
 @api_view(['GET'])
 def get_users_by_user_top_tags(request, nick):
     try:
@@ -359,6 +364,127 @@ def get_users_by_user_top_tags(request, nick):
         return Response({"erro": "Usuário não encontrado"}, status=404)
     except Exception as e:
         return Response({"erro": f"Erro ao buscar usuários: {str(e)}"}, status=500)
+    
+    
+@api_view(['GET'])
+def get_post_tags(request, post_id):
+    try:
+        post = mdl.Post.objects.get(id=post_id)
+        post_tags = mdl.PostTag.objects.filter(id_post=post)
+        tags = mdl.Tags.objects.filter(
+            nome__in=post_tags.values_list('nome_tag', flat=True)
+        )
+        return Response({
+            'tags': [tag.nome for tag in tags]
+        }, status=200)
+    except mdl.Post.DoesNotExist:
+        return Response({"erro": "Post não encontrado"}, status=404)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar tags: {str(e)}"}, status=500)
+    
+    
+@api_view(['GET'])
+def get_user_tags(request, nick):
+    try:
+        tags = u.get_user_interaction_tags(nick)
+        
+        if isinstance(tags, dict) and "erro" in tags:
+            return Response(tags, status=404)
+            
+        return Response(tags, status=200)
+        
+    except Exception as e:
+        return Response(
+            {"erro": f"Erro ao buscar tags: {str(e)}"}, 
+            status=500
+        )
+    
+    
+@api_view(['GET'])
+def get_user_tag_interactions(request, nick):
+    try:
+        tag_counts = u.count_user_tag_interactions(nick)
+        
+        if isinstance(tag_counts, dict) and "erro" in tag_counts:
+            return Response(tag_counts, status=404)
+            
+        return Response(tag_counts, status=200)
+        
+    except Exception as e:
+        return Response(
+            {"erro": f"Erro ao buscar contagem de tags: {str(e)}"}, 
+            status=500
+        )
+
+      
+@api_view(['GET'])
+def get_posts_by_user_top_tags(request, nick):
+    try:
+        tag_counts = u.count_user_tag_interactions(nick)
+
+        if isinstance(tag_counts, dict) and "erro" in tag_counts:
+            return Response(tag_counts, status=404)
+
+        top_tags = [tag['tag'] for tag in tag_counts['tag_interactions']]
+
+        usuario_atual = mdl.Usuario.objects.get(username=nick)
+
+        # Obter IDs dos posts criados pelo usuário
+        posts_criados = mdl.Interacao.objects.filter(
+            id_usuario=usuario_atual.id, tipo='criar post'
+        ).values_list('id_post', flat=True)
+
+        # Filtrar posts pelas tags e excluir os posts criados pelo usuário
+        posts = mdl.Post.objects.filter(
+            posttag__nome_tag__in=top_tags
+        ).exclude(id__in=posts_criados).distinct()
+
+        serializer = srl.PostSerializer(posts, many=True)
+
+        return Response(serializer.data, status=200)
+
+    except mdl.Usuario.DoesNotExist:
+        return Response({"erro": "Usuário não encontrado"}, status=404)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
+
+      
+@api_view(['GET'])
+def combined_feed(request, nick):
+    try:
+        # Obter posts do feed
+        usuario = mdl.Usuario.objects.get(username=nick)
+        seguindo = mdl.Interacao.objects.filter(id_usuario=usuario.id, tipo='seguir perfil')
+        posts_feed = []
+        for amigo in seguindo:
+            perfil_amigo = amigo.id_perfil_seguir
+            posts_amigo = mdl.Interacao.objects.filter(id_usuario=perfil_amigo.id_usuario_perfil, tipo='criar post')
+            for post in posts_amigo:
+                serializer = srl.PostSerializer(post.id_post)
+                posts_feed.append(serializer.data)
+
+        # Obter posts por top tags
+        tag_counts = u.count_user_tag_interactions(nick)
+        if isinstance(tag_counts, dict) and "erro" in tag_counts:
+            return Response(tag_counts, status=404)
+        top_tags = [tag['tag'] for tag in tag_counts['tag_interactions']]
+        posts_criados = mdl.Interacao.objects.filter(id_usuario=usuario.id, tipo='criar post').values_list('id_post', flat=True)
+        posts_top_tags = mdl.Post.objects.filter(posttag__nome_tag__in=top_tags).exclude(id__in=posts_criados).distinct()
+        serializer_top_tags = srl.PostSerializer(posts_top_tags, many=True)
+
+        # Combinar os resultados
+        combined_results = {
+            "feed_posts": posts_feed,
+            "top_tag_posts": serializer_top_tags.data
+        }
+
+        return Response(combined_results, status=200)
+
+    except mdl.Usuario.DoesNotExist:
+        return Response({"erro": "Usuário não encontrado"}, status=404)
+    except Exception as e:
+        return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
+
 
 @api_view(['GET'])
 def get_books_by_user_top_tags(request, nick):

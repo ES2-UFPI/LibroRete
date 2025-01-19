@@ -186,21 +186,21 @@ INSERT IGNORE INTO post_tag (id_post, nome_tag) VALUES
 (8, "#Aprendendo");
 
 INSERT IGNORE INTO interacao (id, tipo, data_interacao, id_usuario, id_post, id_comentario,id_comentario_respondido, curtida, id_perfil_seguir) VALUES
-(1, "criar post", "2024/12/13 12:13:34", 1, 1, NULL,NULL, FALSE, NULL), -- Usuario 1 criou o post 1
-(2, "criar comentario", "2024/12/13 16:34:01", 2, 1, 1, NULL, FALSE, NULL), -- Usuario 2, no post 1, criou o comentário 1
+(1, "criar post", "2024/12/13 12:13:34", 1, 1, NULL,NULL, FALSE, NULL), -- Usuário 1 criou o post 1
+(2, "criar comentario", "2024/12/13 16:34:01", 2, 1, 1, NULL, FALSE, NULL), -- Usuário 2, no post 1, criou o comentário 1
 (3, "like post","2024/12/13 17:43:10", 2, 1, NULL,NULL, TRUE, NULL), -- Usuário 2, no post 1, deu um like no post
 (4, "criar comentario", "2024/12/13 18:12:21", 1, 1, 3, NULL, FALSE, NULL), -- Usuário 1, no post 1, criou o comentário 3
-(5, "responder comentario", "2024/12/13 18:12:21", 1, 1, 3, 1, FALSE, NULL), -- Usuario 1, no post 1, com o comentário 3 respondeu o comentário 1
+(5, "responder comentario", "2024/12/13 18:12:21", 1, 1, 3, 1, FALSE, NULL), -- Usuário 1, no post 1, com o comentário 3 respondeu o comentário 1
 (6, "like comentario", "2024/12/13 19:35:05", 2, 1, 3, NULL, TRUE, NULL), -- Usuário 2, no post 1, deu um like no comentário 3
 (7, "seguir perfil", "2024/12/20 20:55:05", 1, NULL, NULL,NULL,FALSE,2), -- Usuário 1 está seguindo o perfil de id 2
-(8, "criar post", "2025/01/01 14:04:00", 1, 3,NULL,NULL,FALSE,NULL), -- Usuario 1 criou o post 3
-(9, "criar post", "2025/01/02 15:10:21", 1, 4,NULL,NULL,FALSE,NULL), -- Usuario 1 criou o post 4
+(8, "criar post", "2025/01/01 14:04:00", 1, 3,NULL,NULL,FALSE,NULL), -- Usuário 1 criou o post 3
+(9, "criar post", "2025/01/02 15:10:21", 1, 4,NULL,NULL,FALSE,NULL), -- Usuário 1 criou o post 4
 (10, "criar post", "2025/01/07 10:23:50",2,5,NULL,NULL,FALSE,NULL), -- Usuário 2 criou o post 5         
-(11, "criar post", "2025/01/10 20:43:12",2,6,NULL,NULL,FALSE,NULL), -- Usuario 2 criou o post 6
-(12, "criar comentario", "2025/01/07 14:05:04", 1, 5, 6,NULL,FALSE,NULL), -- Usuario 1, no post 5, criou o comentario 6
-(13, "criar comentario", "2025/01/11 12:32:23", 1, 6, 7,NULL,FALSE,NULL), -- Usuario 1, no post 6, criou o comentario 7
-(14, "criar post", "2025/01/09 14:50:12", 4, 7,NULL,NULL,FALSE,NULL), -- Usuario 4, criou o post 7
-(15, "criar post", "2025/01/08 12:06:14", 3, 8,NULL,NULL,FALSE,NULL), -- Usuario 3, criou o post 8
+(11, "criar post", "2025/01/10 20:43:12",2,6,NULL,NULL,FALSE,NULL), -- Usuário 2 criou o post 6
+(12, "criar comentario", "2025/01/07 14:05:04", 1, 5, 6,NULL,FALSE,NULL), -- Usuário 1, no post 5, criou o comentario 6
+(13, "criar comentario", "2025/01/11 12:32:23", 1, 6, 7,NULL,FALSE,NULL), -- Usuário 1, no post 6, criou o comentario 7
+(14, "criar post", "2025/01/09 14:50:12", 4, 7,NULL,NULL,FALSE,NULL), -- Usuário 4 criou o post 7
+(15, "criar post", "2025/01/08 12:06:14", 3, 8,NULL,NULL,FALSE,NULL), -- Usuário 3 criou o post 8
 (16, "seguir perfil", "2025/01/01 12:55:10", 3, NULL, NULL,NULL,FALSE,4), -- Usuário 3 está seguindo o perfil de id 4
 (17, "seguir perfil", "2025/01/01 13:03:00", 4, NULL, NULL,NULL,FALSE,3), -- Usuário 4 está seguindo o perfil de id 3
 (18, "like post","2025/01/10 17:12:05", 3, 8, NULL,NULL, TRUE, NULL), -- Usuário 3, no post 8, deu um like no post
@@ -211,3 +211,8 @@ INSERT IGNORE INTO interacao (id, tipo, data_interacao, id_usuario, id_post, id_
 (23, "like post","2025/01/08 04:12:30", 1, 5, NULL,NULL, TRUE, NULL), -- Usuário 1, no post 5, deu um like no post
 (24, "seguir perfil", "2025/01/09 10:02:03", 3, NULL, NULL,NULL,FALSE,1), -- Usuário 3 está seguindo o perfil de id 1
 (25, "seguir perfil", "2025/01/10 03:05:02", 4, NULL, NULL,NULL,FALSE,1); -- Usuário 4 está seguindo o perfil de id 1
+
+1 - 2
+2 - 1, 3, 4
+3 - 1, 4
+4 - 1, 3
