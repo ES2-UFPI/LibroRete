@@ -64,7 +64,7 @@ def get_user_lists(request, nick):
         
         # Busca todas as listas do usuário
         listas = mdl.Lista.objects.filter(id_perfil_lista=perfil.id)
-        print("d")
+        
         
         result = []
         for lista in listas:
