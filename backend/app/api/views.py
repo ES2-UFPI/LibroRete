@@ -1,5 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, parser_classes
+from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.db.models import Q
@@ -71,36 +72,73 @@ def get_user_lists(request, nick):
             # Pegar instancias de ListaLivro que possuem lista.id
             listalivro = mdl.ListaLivro.objects.filter(id_lista=lista.id)
 
-            # Tabela virtual JOIN de ListaLivro e Livro
-            tabela_virtual = listalivro.select_related('isbn_livro')
+            c = listalivro.values_list('isbn_livro') 
 
-            livros_da_lista = tabela_virtual.values_list('isbn_livro__titulo')
-
-            livros_da_lista_google = tabela_virtual.values_list('isbn_livro__titulo','isbn_livro__isbn')
             arr=[]
-            for titulo, isbn in livros_da_lista_google:
-                response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}")
+            lista_livro=[]
+            for i in c: 
+                # print(i[0])  
+                response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:{i[0]}")
+                #response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:9788581051031") 
                 data = response.json()
+                # print(data)
                 
                 book = data["items"][0]
-                volume_info = book["volumeInfo"]
+                volume_info = book["volumeInfo"] 
 
+                # titulo_api = volume_info.get("title", "Título não encontrado") 
                 titulo_api = volume_info.get("title", "Título não encontrado")
                 autores = volume_info.get("authors", [])
                 data_publicacao = volume_info.get("publishedDate", "Data não encontrada")
                 descricao = volume_info.get("description", "Descrição não disponível")
                 foto = volume_info.get("imageLinks", "Imagem não encontrado")
-
+                
+                # print(f"titulo_api: {titulo_api}")  
 
                 dicionario = {'titulo': titulo_api, 'autor': autores, 'data_publicacao': data_publicacao, 'descricao': descricao, 'foto': foto}
                 arr.append(dicionario)
+                lista_livro.append([titulo_api])
+
+            # Tabela virtual JOIN de ListaLivro e Livro  
+            tabela_virtual = listalivro.select_related('isbn_livro')
+            # print(lista_livro)
+   
+            # for item in tabela_virtual: 
+            #     print(f"ISBN: {item}, Título: ") 
+
+            livros_da_lista = tabela_virtual.values_list('isbn_livro__titulo')
+
+            # for item in livros_da_lista:
+            #     print(item)  
+
+            # livros_da_lista_google = tabela_virtual.values_list('isbn_livro__titulo','isbn_livro__isbn')
+            
+            # for titulo,isbn in livros_da_lista_google:
+            #     response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=intitle:{titulo}+isbn:{isbn}")
+            #     data = response.json()
+                
+            #     book = data["items"][0]
+            #     volume_info = book["volumeInfo"]
+
+            #     titulo_api = volume_info.get("title", "Título não encontrado")
+            #     autores = volume_info.get("authors", [])
+            #     data_publicacao = volume_info.get("publishedDate", "Data não encontrada")
+            #     descricao = volume_info.get("description", "Descrição não disponível")
+            #     foto = volume_info.get("imageLinks", "Imagem não encontrado")
+
+                # print(data)
+                # print(f"ISBN: ")
+
+
+                
 
 
 
             result.append({ 
                 'lista': lista.nome,
                 'descricao': lista.descricao,
-                'livros': list(livros_da_lista),
+                'livros': list(lista_livro),
+                # 'livros': list(livros_da_lista),
                 'livrosAPIGoogle': arr
             }) 
             
