@@ -34,7 +34,7 @@ function SearchResults({ books, users, filter, answerReceived }) {
                   <UserRecommendation
                     key={index}
                     username={user.username}
-                    photo={user.photo}
+                    photo={user.foto}
                   />
                 ))
               )}
