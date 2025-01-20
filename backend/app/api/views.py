@@ -18,17 +18,19 @@ def get_by_nick(request, nick):
     #Retorna o perfil do usuário com base no nome de usuário(nickname) 
     try:
         usuario = mdl.Usuario.objects.get(username=nick)
-    except:
+    except mdl.Usuario.DoesNotExist:
         return Response({"message": "Usuário não encontrado"}, status=404)
     
-    usuario = mdl.Usuario.objects.get(username=nick)
-    perfil = mdl.Perfil.objects.get(id_usuario_perfil=usuario.id)
+   
+    try: 
+        perfil = mdl.Perfil.objects.get(id_usuario_perfil=usuario.id)
+    except mdl.Perfil.DoesNotExist:
+        return Response({"message": "Perfil não encontrado"}, status=404)
 
 
     interacoes_numero_seguidores = mdl.Interacao.objects.filter(tipo="seguir perfil", id_perfil_seguir=perfil.id)
     interacoes_numero_seguindo = mdl.Interacao.objects.filter(tipo="seguir perfil", id_usuario=usuario.id)
     interacoes_numero_posts = mdl.Interacao.objects.filter(tipo="criar post", id_usuario=usuario.id)
-
 
 
 
