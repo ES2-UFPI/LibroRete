@@ -212,7 +212,7 @@ INSERT IGNORE INTO interacao (id, tipo, data_interacao, id_usuario, id_post, id_
 (24, "seguir perfil", "2025/01/09 10:02:03", 3, NULL, NULL,NULL,FALSE,1), -- Usuário 3 está seguindo o perfil de id 1
 (25, "seguir perfil", "2025/01/10 03:05:02", 4, NULL, NULL,NULL,FALSE,1); -- Usuário 4 está seguindo o perfil de id 1
 
-1 - 2
-2 - 1, 3, 4
-3 - 1, 4
-4 - 1, 3
+-- 1 - 2
+-- 2 - 1, 3, 4
+-- 3 - 1, 4
+-- 4 - 1, 3
