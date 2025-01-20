@@ -27,3 +27,8 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = mdl.Post
         fields = '__all__'
+
+class ComentarioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = mdl.Comentario
+        fields = '__all__'
