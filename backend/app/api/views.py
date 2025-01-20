@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 from . import funcoes_tags as u
 from . import serializers as srl
 from . import models as mdl
+from . import funcoes_posts as p
 from django.http import HttpRequest
 import requests
 from abc import ABC, abstractmethod
@@ -408,8 +409,11 @@ def search_books(request):
 def get_all_posts(request):
     try:
         posts = mdl.Post.objects.all()
+        posts_list = []
         serializer = srl.PostSerializer(posts, many=True)
-        return Response(serializer.data)
+        for post in serializer.data:
+            posts_list.append(p.get_post_interacoes(post['id']))
+        return Response(posts_list, status=200)
     except Exception as e:
         return Response({"erro": f"Erro ao buscar posts: {str(e)}"},status=500)
     
@@ -426,35 +430,17 @@ def get_post_usuario(request, nick):
         posts_user = []
         for interacao in interacoes:
             if interacao.id_post:  # Certificar que a interação possui um post
-                post_obj = interacao.id_post  # Já é um objeto Post pela relação ForeignKey
-                post_serializer = srl.PostSerializer(post_obj)
-                post = post_serializer.data
-                lista_comentarios = []
-                interacoes = mdl.Interacao.objects.filter(id_post=post['id'])
-                quant_curtidas = interacoes.filter(tipo='like post').count()
-                quant_comentarios = interacoes.filter(tipo='criar comentario').count()
-                list_comments = interacoes.filter(tipo='criar comentario').values_list('id_comentario', flat=True)
-
-                for comment in list_comments:
-                    comentario = mdl.Comentario.objects.get(id=comment)
-                    serializer_comentario = srl.ComentarioSerializer(comentario)
-                    lista_comentarios.append(serializer_comentario.data)    
-
-                data_atual = timezone.now()
-                data_post = interacoes.filter(tipo='criar post').values_list('data_interacao', flat=True)[0]
-                time_diference = data_atual - data_post
-                data = time_diference.total_seconds()/3600
-
-
+                post= interacao.id_post  # Já é um objeto Post pela relação ForeignKey
+                posts = p.get_post_interacoes(post.id)
                 posts_user.append({
-                    "id": post['id'],
-                    "conteudo": post['conteudo'],
-                    "midia": post['midia'],
-                    "curtidas": quant_curtidas,
-                    "comentarios": quant_comentarios,
-                    "lista_comentarios": lista_comentarios,
-                    "time": int(data),                
-                }) # Adicionar o JSON do post à lista
+                    "id": posts['id'],
+                    "conteudo": posts['conteudo'],
+                    "midia": posts['midia'],
+                    "curtidas": posts['curtidas'],
+                    "comentarios": posts['comentarios'],
+                    "lista_comentarios": posts['lista_comentarios'],
+                    "time": posts['time'],
+                })
         
         return Response(posts_user, status=200)
     except mdl.Usuario.DoesNotExist:
@@ -476,35 +462,8 @@ def get_posts_feed(request, nick):
             posts_amigo = mdl.Interacao.objects.filter(id_usuario=perfil_amigo.id_usuario_perfil, tipo = 'criar post')
             for post in posts_amigo:
                 serializer = srl.PostSerializer(post.id_post)
-                posts = serializer.data
-                lista_comentarios = []
-                interacoes = mdl.Interacao.objects.filter(id_post=posts['id'])
-                quant_curtidas = interacoes.filter(tipo='like post').count()
-                quant_comentarios = interacoes.filter(tipo='criar comentario').count()
-                list_comments = interacoes.filter(tipo='criar comentario').values_list('id_comentario', flat=True)
-
-                for comment in list_comments:
-                    comentario = mdl.Comentario.objects.get(id=comment)
-                    serializer_comentario = srl.ComentarioSerializer(comentario)
-                    lista_comentarios.append(serializer_comentario.data)    
-
-                data_atual = timezone.now()
-                data_post = interacoes.filter(tipo='criar post').values_list('data_interacao', flat=True)[0]
-                time_diference = data_atual - data_post
-                data = time_diference.total_seconds()/3600
-
-
-                posts_feed.append({
-                    "id": posts['id'],
-                    "conteudo": posts['conteudo'],
-                    "midia": posts['midia'],
-                    "curtidas": quant_curtidas,
-                    "comentarios": quant_comentarios,
-                    "lista_comentarios": lista_comentarios,
-                    "time": int(data), 
-                    "foto": perfil_amigo.id_usuario_perfil.foto,
-                    "nome": perfil_amigo.id_usuario_perfil.username                
-                })
+                posts = p.get_post_interacoes(serializer.data['id'])
+                posts_feed.append(posts)
         
         return Response(posts_feed, status=200)
     except mdl.Usuario.DoesNotExist:
@@ -730,40 +689,14 @@ def combined_feed(request, nick):
         usuario = mdl.Usuario.objects.get(username=nick)
         seguindo = mdl.Interacao.objects.filter(id_usuario=usuario.id, tipo='seguir perfil')
         posts_feed = []
+        ids_posts =set()
         for amigo in seguindo:
             perfil_amigo = amigo.id_perfil_seguir
             posts_amigo = mdl.Interacao.objects.filter(id_usuario=perfil_amigo.id_usuario_perfil, tipo='criar post')
             for post in posts_amigo:
-                serializer = srl.PostSerializer(post.id_post)
-                posts = serializer.data
-                lista_comentarios = []
-                interacoes = mdl.Interacao.objects.filter(id_post=posts['id'])
-                quant_curtidas = interacoes.filter(tipo='like post').count()
-                quant_comentarios = interacoes.filter(tipo='criar comentario').count()
-                list_comments = interacoes.filter(tipo='criar comentario').values_list('id_comentario', flat=True)
+                posts_feed.append(p.get_post_interacoes(post.id_post.id))
+                ids_posts.add(post.id_post.id)
 
-                for comment in list_comments:
-                    comentario = mdl.Comentario.objects.get(id=comment)
-                    serializer_comentario = srl.ComentarioSerializer(comentario)
-                    lista_comentarios.append(serializer_comentario.data)    
-
-                data_atual = timezone.now()
-                data_post = interacoes.filter(tipo='criar post').values_list('data_interacao', flat=True)[0]
-                time_diference = data_atual - data_post
-                data = time_diference.total_seconds()/3600
-
-
-                posts_feed.append({
-                    "id": posts['id'],
-                    "conteudo": posts['conteudo'],
-                    "midia": posts['midia'],
-                    "curtidas": quant_curtidas,
-                    "comentarios": quant_comentarios,
-                    "lista_comentarios": lista_comentarios,
-                    "time": int(data), 
-                    "foto": perfil_amigo.id_usuario_perfil.foto,
-                    "nome": perfil_amigo.id_usuario_perfil.username                
-                })
 
         # Obter posts por top tags
         tag_counts = u.count_user_tag_interactions(nick)
@@ -773,40 +706,9 @@ def combined_feed(request, nick):
         top_tags = [tag['tag'] for tag in tag_counts['tag_interactions']]
         posts_criados = mdl.Interacao.objects.filter(id_usuario=usuario.id, tipo='criar post').values_list('id_post', flat=True)
         posts_top_tags = mdl.Post.objects.filter(posttag__nome_tag__in=top_tags).exclude(id__in=posts_criados).distinct()
-        serializer_top_tags = srl.PostSerializer(posts_top_tags, many=True)
+        posts_top_tags = posts_top_tags.exclude(id__in=ids_posts)
         for post in posts_top_tags:
-                serializer = srl.PostSerializer(post)
-                posts = serializer.data
-                interacao_criar_post = mdl.Interacao.objects.get(id_post = posts['id'], tipo='criar post')
-                perfil_criador_post = mdl.Perfil.objects.get(id_usuario_perfil=interacao_criar_post.id_usuario)
-                lista_comentarios = []
-                interacoes = mdl.Interacao.objects.filter(id_post=posts['id'])
-                quant_curtidas = interacoes.filter(tipo='like post').count()
-                quant_comentarios = interacoes.filter(tipo='criar comentario').count()
-                list_comments = interacoes.filter(tipo='criar comentario').values_list('id_comentario', flat=True)
-
-                for comment in list_comments:
-                    comentario = mdl.Comentario.objects.get(id=comment)
-                    serializer_comentario = srl.ComentarioSerializer(comentario)
-                    lista_comentarios.append(serializer_comentario.data)    
-
-                data_atual = timezone.now()
-                data_post = interacoes.filter(tipo='criar post').values_list('data_interacao', flat=True)[0]
-                time_diference = data_atual - data_post
-                data = time_diference.total_seconds()/3600
-
-
-                tag_posts.append({
-                    "id": posts['id'],
-                    "conteudo": posts['conteudo'],
-                    "midia": posts['midia'],
-                    "curtidas": quant_curtidas,
-                    "comentarios": quant_comentarios,
-                    "lista_comentarios": lista_comentarios,
-                    "time": int(data), 
-                    "foto": perfil_criador_post.id_usuario_perfil.foto,
-                    "nome": perfil_criador_post.id_usuario_perfil.username                
-                })
+                tag_posts.append(p.get_post_interacoes(post.id))
         # Combinar os resultados
         combined_results = {
             "feed_posts": posts_feed,
