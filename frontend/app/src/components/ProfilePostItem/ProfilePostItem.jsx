@@ -1,24 +1,46 @@
 import './ProfilePostItem.css'
-import React from 'react'
+import ModalPost from '../modalPost/ModalPost'
+import { React, useState } from 'react'
 
-const ProfilePostItem = ({ media, id }) => {
+const ProfilePostItem = ({ midia, id, conteudo }) => {
+  const post = {
+    time: 'há 1h',
+    liked: false,
+    image: midia,
+    caption: conteudo,
+    username: 'eduarda',
+    num_likes: 10,
+    num_shares: 11,
+    num_comments: 12,
+  }
+  const [isModalPostOpen, setIsModalPostOpen] = useState(false)
+
+  const openModalPost = () => {
+    setIsModalPostOpen(true)
+  }
+
+  const closeModalPost = () => {
+    setIsModalPostOpen(false)
+  }
   const handleClickProfilePostItem = () => {
-    const postData = {
-      media: media,
-      id: id,
-    }
-
-    alert(JSON.stringify(postData, null, 2))
+    openModalPost()
   }
 
   return (
-    <img
-      className="profile-post-img"
-      src={media}
-      id={id}
-      alt="Imagem de post de perfil"
-      onClick={handleClickProfilePostItem}
-    />
+    <>
+      <img
+        className="profile-post-img"
+        src={midia}
+        id={id}
+        alt="Imagem de post de perfil"
+        onClick={handleClickProfilePostItem}
+      />
+      <ModalPost
+        isOpen={isModalPostOpen}
+        onClose={closeModalPost}
+        post={post}
+      ></ModalPost>
+    </>
   )
 }
 

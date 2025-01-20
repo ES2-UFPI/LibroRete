@@ -53,6 +53,15 @@
   padding: 5px;
   border-radius: 50%;
   background-color: #f2eae0;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #e0d1b3;
+}
+
+.button:active {
+  background-color: #d0c1a0;
 }
 
 .books {

@@ -52,7 +52,7 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  margin: 0px 10px;
+  margin: 0px 10px 30px 10px;
   gap: 30px;
   scrollbar-width: none;
 }

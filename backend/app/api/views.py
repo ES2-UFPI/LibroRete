@@ -7,10 +7,12 @@ from django.db.models import Q
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
-from . import utils as u
+from . import funcoes_tags as u
 from . import serializers as srl
 from . import models as mdl
+from django.http import HttpRequest
 import requests
+from abc import ABC, abstractmethod
 
 @api_view(['GET'])
 def get_by_nick(request, nick):
@@ -129,11 +131,6 @@ def get_user_lists(request, nick):
                 # print(data)
                 # print(f"ISBN: ")
 
-
-                
-
-
-
             result.append({ 
                 'lista': lista.nome,
                 'descricao': lista.descricao,
@@ -150,66 +147,228 @@ def get_user_lists(request, nick):
         return Response({"message": str(e)}, status=500)
 
 
+
+class InteractionStrategy(ABC):
+    @abstractmethod
+    def validate(self, data, user):
+        pass
+    
+    @abstractmethod
+    def execute(self, data, user):
+        pass
+
+class PostLikeStrategy(InteractionStrategy):
+    def validate(self, data, user):
+        if mdl.Interacao.objects.filter(id_usuario=data['id_usuario'], id_post=data['id_post']).exists():
+            return False, "Usuário já deu like nesse post"
+        try:
+            post = mdl.Post.objects.get(id=data['id_post'])
+        except mdl.Post.DoesNotExist:
+            return False, "Post não encontrado"
+        return True, {'post': post}
+
+    def execute(self, data, validated_data):
+        return {
+            'id_post': validated_data['post'],
+            'curtida': True
+        }
+
+class CommentLikeStrategy(InteractionStrategy):
+    def validate(self, data, user):
+        # First check if interaction already exists
+        if mdl.Interacao.objects.filter(
+            id_usuario=data['id_usuario'],
+            id_post=data['id_post'],
+            id_comentario=data['id_comentario'],
+            id_comentario_respondido=data.get('id_comentario_pai')
+        ).exists():
+            return False, "Usuário já deu like nesse comentário"
+
+        # Then verify if comment exists and belongs to the specified post
+        try:
+            comentario = mdl.Comentario.objects.get(
+                id=data['id_comentario'],
+                id_post_id=data['id_post']  # This ensures comment belongs to the post
+            )
+        except mdl.Comentario.DoesNotExist:
+            return False, "Comentário não encontrado ou não pertence ao post especificado"
+
+        return True, {'comentario': comentario}
+
+    def execute(self, data, validated_data):
+        return {
+            'id_post': validated_data['comentario'].id_post,
+            'id_comentario': validated_data['comentario'],
+            'curtida': True
+        }
+
+
+class CreateCommentStrategy(InteractionStrategy):
+    def validate(self, data, user):
+        if not data.get('conteudo_comentario'):
+            return False, "Conteúdo do comentário é obrigatório"
+        try:
+            post = mdl.Post.objects.get(id=data['id_post'])
+        except mdl.Post.DoesNotExist:
+            return False, "Post não encontrado"
+        return True, {'post': post}
+
+    def execute(self, data, validated_data):
+        id_coment = mdl.Comentario.objects.count() + 1
+        while mdl.Comentario.objects.filter(id=id_coment).exists():
+            id_coment += 1
+
+        novo_comentario = mdl.Comentario.objects.create(
+            id=id_coment,
+            conteudo=data['conteudo_comentario'],
+            id_post=validated_data['post']
+        )
+
+        # Return only the fields that should be used in Interacao creation
+        return {
+            'id_comentario': novo_comentario,
+            'id_post': validated_data['post'],
+            'curtida': False
+        }
+
+class ReplyCommentStrategy(InteractionStrategy):
+    def validate(self, data, user):
+        if not data.get('conteudo_comentario'):
+            return False, "Conteúdo do comentário é obrigatório"
+        if not data.get('id_comentario_pai'):
+            return False, "ID do comentário pai é obrigatório"
+        try:
+            comentario_pai = mdl.Comentario.objects.get(id=data['id_comentario_pai'])
+            post = mdl.Post.objects.get(id=data['id_post'])
+        except mdl.Comentario.DoesNotExist:
+            return False, "Comentário pai não encontrado"
+        except mdl.Post.DoesNotExist:
+            return False, "Post não encontrado"
+        return True, {'comentario_pai': comentario_pai, 'post': post}
+
+    def execute(self, data, validated_data):
+        id_coment = mdl.Comentario.objects.count() + 1
+        while mdl.Comentario.objects.filter(id=id_coment).exists():
+            id_coment += 1
+
+        novo_comentario = mdl.Comentario.objects.create(
+            id=id_coment,
+            conteudo=data['conteudo_comentario'],
+            id_post=validated_data['post'],
+            id_comentario_pai=validated_data['comentario_pai']
+        )
+        return {
+            'id_comentario': novo_comentario,
+            'id_post': validated_data['post'],
+            'id_comentario_respondido': validated_data['comentario_pai'],
+            'curtida': False
+        }
+
+class FollowProfileStrategy(InteractionStrategy):
+    def validate(self, data, user):
+        if mdl.Interacao.objects.filter(
+            id_usuario=data['id_usuario'],
+            id_perfil_seguir=data['id_perfil_seguir']
+        ).exists():
+            return False, "Usuário já segue este perfil"
+        try:
+            perfil = mdl.Perfil.objects.get(id=data['id_perfil_seguir'])
+        except mdl.Perfil.DoesNotExist:
+            return False, "Perfil a seguir não encontrado"
+        return True, {'perfil': perfil}
+
+    def execute(self, data, validated_data):
+        return {
+            'id_perfil_seguir': validated_data['perfil'],
+            'curtida': False
+        }
+
+class InteractionContext:
+    def __init__(self):
+        self._strategies = {
+            'like post': PostLikeStrategy(),
+            'like comentario': CommentLikeStrategy(),
+            'criar comentario': CreateCommentStrategy(),
+            'responder comentario': ReplyCommentStrategy(),
+            'seguir perfil': FollowProfileStrategy()
+        }
+
+    def handle_interaction(self, tipo, data, user):
+        if tipo not in self._strategies:
+            return False, "Tipo de interação inválido"
+        
+        strategy = self._strategies[tipo]
+        is_valid, result = strategy.validate(data, user)
+        if not is_valid:
+            return False, result
+            
+        return True, strategy.execute(data, result)
+
 # {
-#     "tipo": "curtir",
-#     "id_usuario": 777,
-#     "id_post": 777
+#     "tipo": "criar comentario",
+#     "id_usuario": 4,
+#     "id_post": 7,
+#     "conteudo_comentario": "Queria ta jogando Valheim D;"
 # }
-@csrf_exempt # Decorador perigoso?
+# {
+#     "tipo": "responder comentario",
+#     "id_usuario": 2,
+#     "id_post": 7,
+#     "id_comentario_pai": 8,
+#     "conteudo_comentario": "tbm ;("
+# }
+# {
+#     "tipo": "like post",
+#     "id_usuario": 1,
+#     "id_post": 5
+# }
+# {
+#     "tipo": "like comentario",
+#     "id_usuario": 2,
+#     "id_post": 7,
+#     "id_comentario": 8
+# }
+# {
+#     "tipo": "seguir perfil", 
+#     "id_usuario": 1,
+#     "id_perfil_seguir": 3
+# }
+@csrf_exempt
 @api_view(['POST'])
 def create_interaction(request):
     try:
-        # Obter dados do request
         tipo = request.data.get('tipo')
         id_usuario = request.data.get('id_usuario')
-        id_post = request.data.get('id_post')
 
-        # Criando e validando id da nova interacao
-        while True:
-            total_interacoes = mdl.Interacao.objects.count()
-            id_interacao = total_interacoes + 1
-            if not mdl.Interacao.objects.filter(id=id_interacao).exists():
-                break
-
-        data = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
-
-        # Validar inexistência da interação
-        if mdl.Interacao.objects.filter(tipo=tipo,id_usuario=id_usuario,id_post=id_post).exists():
-            return Response({"erro": "Interação já existe"}, status=400)
-
-        # Validar tipo de interação
-        tipos_validos = ['curtir', 'comentar', 'visualizar']
-        if tipo not in tipos_validos:
-            return Response({"erro": f"Tipo de interação inválido. Tipos válidos: {tipos_validos}"},status=400)
-
-        # Validar existência do usuário
         try:
             usuario = mdl.Usuario.objects.get(id=id_usuario)
         except mdl.Usuario.DoesNotExist:
-            return Response({"erro": "Usuário não encontrado"},status=404)
+            return Response({"erro": "Usuário não encontrado"}, status=404)
 
-        # Validar existência do post
-        try:
-            post = mdl.Post.objects.get(id=id_post)
-        except mdl.Post.DoesNotExist:
-            return Response({"erro": "Post não encontrado"},status=404)
+        interaction_context = InteractionContext()
+        success, result = interaction_context.handle_interaction(tipo, request.data, usuario)
 
-        # Criar nova interação
-        nova_interacao = mdl.Interacao(
+        if not success:
+            return Response({"erro": result}, status=400)
+
+        id_interacao = mdl.Interacao.objects.count() + 1
+        while mdl.Interacao.objects.filter(id=id_interacao).exists():
+            id_interacao += 1
+
+        nova_interacao = mdl.Interacao.objects.create(
             id=id_interacao,
             tipo=tipo,
-            data_interacao=data,
+            data_interacao=timezone.now(),
             id_usuario=usuario,
-            id_post=post
+            **result
         )
-        nova_interacao.save()
 
-        # Serializar e retornar resposta
         serializer = srl.InteracaoSerializer(nova_interacao)
         return Response(serializer.data, status=201)
 
     except Exception as e:
-        return Response({"erro": f"Erro ao criar interação: {str(e)}"},status=500)
+        return Response({"erro": f"Erro ao criar interação: {str(e)}"}, status=500)
+
 
       
 # http://localhost:8000/api/buscar-livros/?autor=G&titulo=1
@@ -244,7 +403,7 @@ def search_books(request):
     except Exception as e:
         return Response({"erro": str(e)}, status=500)
 
-      
+
 @api_view(['GET'])
 def get_all_posts(request):
     try:
@@ -254,7 +413,7 @@ def get_all_posts(request):
     except Exception as e:
         return Response({"erro": f"Erro ao buscar posts: {str(e)}"},status=500)
     
-      
+
 @api_view(['GET'])
 def get_post_usuario(request, nick):
     try:
@@ -303,7 +462,7 @@ def get_post_usuario(request, nick):
     except Exception as e:
         return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
 
-      
+
 @api_view(['GET'])
 def get_posts_feed(request, nick):
     try:
@@ -456,7 +615,7 @@ def create_post(request):
     serializer = srl.PostSerializer(novo_post)
     return Response(serializer.data, status=201)
 
- 
+  
 @api_view(['GET'])
 def get_users_by_user_top_tags(request, nick):
     try:
@@ -660,6 +819,7 @@ def combined_feed(request, nick):
         return Response({"erro": "Usuário não encontrado"}, status=404)
     except Exception as e:
         return Response({"erro": f"Erro ao buscar posts: {str(e)}"}, status=500)
+
 
 
 @api_view(['GET'])

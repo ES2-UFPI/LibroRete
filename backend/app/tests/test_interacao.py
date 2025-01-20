@@ -49,3 +49,50 @@
 #         # Tenta mandar interacao
 #         response = self.client.post("/api/interacoes/", data)
 #         self.assertEqual(response.status_code, 400)
+
+# from django.urls import reverse
+# from rest_framework.test import APITestCase
+# from api.models import Usuario, Post, Comentario, Interacao
+
+# class InteractionTests(APITestCase):
+#     def setUp(self):
+#         self.usuario1 = Usuario.objects.create(id=777, nome='Raimundo Neto', username='raimundo', email='raimundo@gmail.com', senha='123', foto='foto1')
+#         self.post1 = Post.objects.create(id=999, conteudo='Post de Teste', midia='url')
+    
+#     def tearDown(self):
+#         Interacao.objects.filter(id_usuario=self.usuario1).delete()
+#         Post.objects.filter(id=999).delete()
+#         Usuario.objects.filter(id=777).delete()
+
+#     def test_create_comment(self):
+#         url = reverse('criar_interacao')
+#         data = {
+#             "tipo": "criar comentario",
+#             "id_usuario": self.usuario1.id,
+#             "id_post": self.post1.id,
+#             "conteudo_comentario": "Queria ta jogando Valheim D;"
+#         }
+#         response = self.client.post(url, data, format='json')
+#         self.assertEqual(response.status_code, 201)
+#         self.assertEqual(Comentario.objects.count(), 8)
+#         comentario = Comentario.objects.get(id=1)
+#         self.assertEqual(comentario.conteudo, "Queria ta jogando Valheim D;")
+#         self.assertEqual(comentario.id_post.id, self.post1.id)
+
+#     def test_reply_comment(self):
+#         comentario_pai = Comentario.objects.create(id=1, conteudo='Comentário Pai', id_post=self.post1)
+#         url = reverse('criar_interacao')
+#         data = {
+#             "tipo": "responder comentario",
+#             "id_usuario": self.usuario1.id,
+#             "id_post": self.post1.id,
+#             "id_comentario_pai": comentario_pai.id,
+#             "conteudo_comentario": "tuudoooo!"
+#         }
+#         response = self.client.post(url, data, format='json')
+#         self.assertEqual(response.status_code, 201)
+#         self.assertEqual(Comentario.objects.count(), 9)
+#         comentario = Comentario.objects.get(id=2)
+#         self.assertEqual(comentario.conteudo, "tuudoooo!")
+#         self.assertEqual(comentario.id_post.id, self.post1.id)
+#         self.assertEqual(comentario.id_comentario_pai.id, comentario_pai.id)
