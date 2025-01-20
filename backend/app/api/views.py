@@ -73,13 +73,13 @@ def get_user_lists(request, nick):
             # Pegar instancias de ListaLivro que possuem lista.id
             listalivro = mdl.ListaLivro.objects.filter(id_lista=lista.id)
 
-            c = listalivro.values_list('isbn_livro') 
+            listalivro = listalivro.values_list('isbn_livro') 
 
-            arr=[]
+            array_livros_google_info=[]
             lista_livro=[]
-            for i in c: 
+            for isbn in listalivro: 
                 # print(i[0])  
-                response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:{i[0]}")
+                response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn[0]}")
                 #response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:9788581051031") 
                 data = response.json()
                 # print(data)
@@ -97,7 +97,7 @@ def get_user_lists(request, nick):
                 # print(f"titulo_api: {titulo_api}")  
 
                 dicionario = {'titulo': titulo_api, 'autor': autores, 'data_publicacao': data_publicacao, 'descricao': descricao, 'foto': foto}
-                arr.append(dicionario)
+                array_livros_google_info.append(dicionario)
                 lista_livro.append([titulo_api])
 
             # Tabela virtual JOIN de ListaLivro e Livro  
@@ -140,7 +140,7 @@ def get_user_lists(request, nick):
                 'descricao': lista.descricao,
                 'livros': list(lista_livro),
                 # 'livros': list(livros_da_lista),
-                'livrosAPIGoogle': arr
+                'livrosAPIGoogle': array_livros_google_info
             }) 
             
         return Response(result)  
