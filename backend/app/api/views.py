@@ -23,13 +23,13 @@ def get_by_nick(request, nick):
     
     usuario = mdl.Usuario.objects.get(username=nick)
     perfil = mdl.Perfil.objects.get(id_usuario_perfil=usuario.id)
-    serializer = srl.PerfilSerializer(perfil)
+
 
     interacoes_numero_seguidores = mdl.Interacao.objects.filter(tipo="seguir perfil", id_perfil_seguir=perfil.id)
     interacoes_numero_seguindo = mdl.Interacao.objects.filter(tipo="seguir perfil", id_usuario=usuario.id)
     interacoes_numero_posts = mdl.Interacao.objects.filter(tipo="criar post", id_usuario=usuario.id)
 
-    interacoes = mdl.Interacao.objects.filter(tipo="criar post", id_usuario=usuario.id)
+
 
 
     return Response({
@@ -101,13 +101,13 @@ def get_user_lists(request, nick):
                 lista_livro.append([titulo_api])
 
             # Tabela virtual JOIN de ListaLivro e Livro  
-            tabela_virtual = listalivro.select_related('isbn_livro')
+    
             # print(lista_livro)
    
             # for item in tabela_virtual: 
             #     print(f"ISBN: {item}, Título: ") 
 
-            livros_da_lista = tabela_virtual.values_list('isbn_livro__titulo')
+  
 
             # for item in livros_da_lista:
             #     print(item)  
