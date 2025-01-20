@@ -10,9 +10,8 @@ function Pesquisa() {
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [searchData, setSearchData] = useState('')
   const [adicFilters, setAdicFilters] = useState({
-    genre: '',
-    author: '',
-    year: '',
+    genero: '',
+    autor: '',
   })
   const [userData, setUserData] = useState([])
   const [bookData, setBookData] = useState([])
@@ -33,12 +32,39 @@ function Pesquisa() {
     }
   }
 
+  const fetchBooks = async () => {
+    setLoading(true)
+
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/api/buscar-livros/?titulo=${searchData}`
+      )
+
+      const booksWithGenres = response.data.map(book => {
+        return {
+          ...book,
+          genero: book.genero ? book.genero.split(',').map(g => g.trim()) : [],
+        }
+      })
+
+      setBookData(booksWithGenres)
+    } catch (error) {
+      setError(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleSearchBarSubmit = e => {
     e.preventDefault()
+    setUserData([])
+    setBookData([])
+    setAnswerReceived(false)
     if (searchData.trim() !== '') {
       setAnswerReceived(true)
       setLoading(true)
       fetchUsers()
+      fetchBooks()
     }
   }
 
@@ -49,36 +75,39 @@ function Pesquisa() {
   const handleChangeFilter = e => {
     const value = e.target.value
     setSelectedFilter(value)
+
     if (value === 'all') {
-      setAdicFilters({ genre: '', author: '', year: '' })
+      setAdicFilters({ genero: '', autor: '' })
     }
   }
 
   const handleApplyFilters = () => {
+    const genero = document.getElementById('genero').value
+    const autor = document.getElementById('autor').value
+
     setAdicFilters({
-      genre: adicFilters.genre,
-      author: adicFilters.author,
-      year: adicFilters.year,
+      genero: genero,
+      autor: autor,
     })
   }
 
   const filterBooks = (books, filters) => {
     return books.filter(book => {
-      const genreMatch = filters.genre
-        ? book.genre.some(g =>
-            g.toLowerCase().includes(filters.genre.toLowerCase())
+      const generoMatch = filters.genero
+        ? book.genero.some(g =>
+            g.toLowerCase().includes(filters.genero.toLowerCase())
           )
         : true
-      const authorMatch = filters.author
-        ? book.author.toLowerCase().includes(filters.author.toLowerCase())
+
+      const autorMatch = filters.autor
+        ? book.autor.toLowerCase().includes(filters.autor.toLowerCase())
         : true
-      const yearMatch = filters.year ? book.year === filters.year : true
-      return genreMatch && authorMatch && yearMatch
+
+      return generoMatch && autorMatch
     })
   }
 
   if (loading) return <div>Carregando ...</div>
-  if (erro) return <div>Erro ao carregar os dados: {erro.message}</div>
 
   return (
     <form onSubmit={handleSearchBarSubmit} id="search-form">
@@ -170,6 +199,7 @@ function Pesquisa() {
               name="ano-publi"
               type="text"
               className="text-input"
+              disabled
             ></input>
           </div>
           <button
