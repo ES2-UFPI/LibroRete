@@ -11,6 +11,15 @@
   display: none;
 }
 
+.recommendations-section-text {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 5px;
+  color: #8a726a;
+}
+
 @media (max-width: 480px) {
   .FeedPostsContent {
     gap: 40px;
