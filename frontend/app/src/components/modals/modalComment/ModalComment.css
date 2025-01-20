@@ -31,14 +31,51 @@
 .modal-comment-content {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+}
+
+.comments-content {
+  flex: 1;
+  margin: 10px 0px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: 300px;
+  gap: 10px;
+}
+
+.comments-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.comments-content::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.comments-content::-webkit-scrollbar-thumb {
+  background: #8a726a;
+  border-radius: 10px;
+}
+
+.comments-content::-webkit-scrollbar-thumb:hover {
+  background: #7d6657;
+}
+
+.comments-content::-webkit-scrollbar-thumb:active {
+  background: #6a5a49;
+}
+
+.new-comment-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .modal-close {
   cursor: pointer;
 }
 
-#comment-button {
+#new-comment-button {
   padding: 5px 20px;
   font-weight: 600;
   font-size: 0.9rem;
@@ -48,18 +85,17 @@
   cursor: pointer;
 }
 
-#comment-button:hover {
+#new-comment-button:hover {
   background-color: #b8a28e;
   border-color: #a38d78;
 }
 
-#comment-button:active {
+#new-comment-button:active {
   background-color: #a38d78;
   transform: scale(0.98);
 }
 
 #comment {
-  height: 150px;
   padding: 12px;
   font-size: 16px;
   font-family: 'Arial', sans-serif;
