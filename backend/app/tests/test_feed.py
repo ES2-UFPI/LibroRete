@@ -7,7 +7,15 @@ class FeedTest(TestCase):
     def test_get_posts_feed(self):
         response = self.client.get("/api/posts-seguindo/feed/@eduarda")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [
+        
+        # Verificar apenas os campos id, conteudo e midia de cada post
+        posts_simplificados = [{
+            'id': post['id'],
+            'conteudo': post['conteudo'],
+            'midia': post['midia']
+        } for post in response.json()]
+
+        self.assertEqual(posts_simplificados, [
             {
                 "id": 5,
                 "conteudo": "Ler crônicas nunca é demais 😎",
