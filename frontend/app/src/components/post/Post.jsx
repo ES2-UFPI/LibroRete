@@ -23,6 +23,7 @@ const Post = ({
   username,
   image,
   caption,
+  comments,
 }) => {
   const [isLiked, setIsLiked] = useState(liked)
   const [numLikes, setNumLikes] = useState(num_likes)
@@ -31,7 +32,7 @@ const Post = ({
   const [numShares, setNumShares] = useState(num_shares)
   const [numComments, setNumComments] = useState(num_comments)
 
-  const [comments, setComments] = useState([])
+  const [comment, setComment] = useState([])
 
   const openModalShare = () => {
     setIsModalShareOpen(true)
@@ -83,7 +84,7 @@ const Post = ({
   }
 
   const handleSubmitComment = comment => {
-    setComments(prevComments => [...prevComments, comment])
+    setComment(prevComments => [...prevComments, comment])
 
     const json_comment = {
       tipo: 'comment',
@@ -176,6 +177,7 @@ const Post = ({
               isOpen={isModalCommentOpen}
               onClose={closeModalComment}
               onSubmitComment={handleSubmitComment}
+              comments={comments}
             ></ModalComment>
           </div>
           <div className="info-interaction">

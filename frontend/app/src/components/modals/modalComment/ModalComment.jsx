@@ -1,10 +1,11 @@
 import { React, useState } from 'react'
 import './ModalComment.css'
+import Comment from '../../comment/Comment'
 
 import { IoCloseCircleSharp } from 'react-icons/io5'
 import { IoCloseCircleOutline } from 'react-icons/io5'
 
-const ModalComment = ({ isOpen, onClose, onSubmitComment }) => {
+const ModalComment = ({ isOpen, onClose, onSubmitComment, comments }) => {
   const [formData, setFormData] = useState({
     comment: '',
   })
@@ -47,7 +48,7 @@ const ModalComment = ({ isOpen, onClose, onSubmitComment }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-comment" onClick={e => e.stopPropagation()}>
         <div className="modal-comment-header">
-          <h3>Faça seu comentário!</h3>
+          <h3>Confira os comentários!</h3>
           {isActive || isHovered ? (
             <IoCloseCircleSharp
               className="modal-close"
@@ -75,18 +76,36 @@ const ModalComment = ({ isOpen, onClose, onSubmitComment }) => {
           )}
         </div>
         <div className="modal-comment-content">
-          <label htmlFor="comment"></label>
-          <textarea
-            id="comment"
-            name="comment"
-            value={formData.comment}
-            onChange={handleChange}
-            rows="4"
-            placeholder="Digite seu comentário aqui..."
-          ></textarea>
-          <button id="comment-button" onClick={handleSubmit}>
-            Enviar
-          </button>
+          <div className="comments-content">
+            {comments.map((comment, index) => (
+              <Comment
+                key={index}
+                id={comment.id}
+                conteudo={comment.conteudo}
+                username={comment.username}
+                foto={comment.foto}
+                id_comentario_pai={comment.id_comentario_pai}
+                id_post={comment.id_post}
+                liked={comment.liked}
+                num_likes={comment.num_likes}
+              />
+            ))}
+          </div>
+          <div className="new-comment-content">
+            <h3>Deixe o seu!</h3>
+            <label htmlFor="comment"></label>
+            <textarea
+              id="comment"
+              name="comment"
+              value={formData.comment}
+              onChange={handleChange}
+              rows="2"
+              placeholder="Digite seu comentário aqui..."
+            ></textarea>
+            <button id="new-comment-button" onClick={handleSubmit}>
+              Enviar
+            </button>
+          </div>
         </div>
       </div>
     </div>

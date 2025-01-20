@@ -7,11 +7,12 @@ from django.db.models import Q
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
-from . import utils as u
+from . import funcoes_tags as u
 from . import serializers as srl
 from . import models as mdl
 from django.http import HttpRequest
 import requests
+from abc import ABC, abstractmethod
 
 @api_view(['GET'])
 def get_by_nick(request, nick):
@@ -97,6 +98,7 @@ def get_user_lists(request, nick):
                 array_livros_google_info.append(dicionario)
                 lista_livro.append([titulo_api])
 
+
             result.append({ 
                 'lista': lista.nome,
                 'descricao': lista.descricao,
@@ -112,172 +114,222 @@ def get_user_lists(request, nick):
         return Response({"message": str(e)}, status=500)
 
 
+
+class InteractionStrategy(ABC):
+    @abstractmethod
+    def validate(self, data, user):
+        pass
+    
+    @abstractmethod
+    def execute(self, data, user):
+        pass
+
+class PostLikeStrategy(InteractionStrategy):
+    def validate(self, data, user):
+        if mdl.Interacao.objects.filter(id_usuario=data['id_usuario'], id_post=data['id_post']).exists():
+            return False, "Usuário já deu like nesse post"
+        try:
+            post = mdl.Post.objects.get(id=data['id_post'])
+        except mdl.Post.DoesNotExist:
+            return False, "Post não encontrado"
+        return True, {'post': post}
+
+    def execute(self, data, validated_data):
+        return {
+            'id_post': validated_data['post'],
+            'curtida': True
+        }
+
+class CommentLikeStrategy(InteractionStrategy):
+    def validate(self, data, user):
+        # First check if interaction already exists
+        if mdl.Interacao.objects.filter(
+            id_usuario=data['id_usuario'],
+            id_post=data['id_post'],
+            id_comentario=data['id_comentario'],
+            id_comentario_respondido=data.get('id_comentario_pai')
+        ).exists():
+            return False, "Usuário já deu like nesse comentário"
+
+        # Then verify if comment exists and belongs to the specified post
+        try:
+            comentario = mdl.Comentario.objects.get(
+                id=data['id_comentario'],
+                id_post_id=data['id_post']  # This ensures comment belongs to the post
+            )
+        except mdl.Comentario.DoesNotExist:
+            return False, "Comentário não encontrado ou não pertence ao post especificado"
+
+        return True, {'comentario': comentario}
+
+    def execute(self, data, validated_data):
+        return {
+            'id_post': validated_data['comentario'].id_post,
+            'id_comentario': validated_data['comentario'],
+            'curtida': True
+        }
+
+
+class CreateCommentStrategy(InteractionStrategy):
+    def validate(self, data, user):
+        if not data.get('conteudo_comentario'):
+            return False, "Conteúdo do comentário é obrigatório"
+        try:
+            post = mdl.Post.objects.get(id=data['id_post'])
+        except mdl.Post.DoesNotExist:
+            return False, "Post não encontrado"
+        return True, {'post': post}
+
+    def execute(self, data, validated_data):
+        id_coment = mdl.Comentario.objects.count() + 1
+        while mdl.Comentario.objects.filter(id=id_coment).exists():
+            id_coment += 1
+
+        novo_comentario = mdl.Comentario.objects.create(
+            id=id_coment,
+            conteudo=data['conteudo_comentario'],
+            id_post=validated_data['post']
+        )
+
+        # Return only the fields that should be used in Interacao creation
+        return {
+            'id_comentario': novo_comentario,
+            'id_post': validated_data['post'],
+            'curtida': False
+        }
+
+class ReplyCommentStrategy(InteractionStrategy):
+    def validate(self, data, user):
+        if not data.get('conteudo_comentario'):
+            return False, "Conteúdo do comentário é obrigatório"
+        if not data.get('id_comentario_pai'):
+            return False, "ID do comentário pai é obrigatório"
+        try:
+            comentario_pai = mdl.Comentario.objects.get(id=data['id_comentario_pai'])
+            post = mdl.Post.objects.get(id=data['id_post'])
+        except mdl.Comentario.DoesNotExist:
+            return False, "Comentário pai não encontrado"
+        except mdl.Post.DoesNotExist:
+            return False, "Post não encontrado"
+        return True, {'comentario_pai': comentario_pai, 'post': post}
+
+    def execute(self, data, validated_data):
+        id_coment = mdl.Comentario.objects.count() + 1
+        while mdl.Comentario.objects.filter(id=id_coment).exists():
+            id_coment += 1
+
+        novo_comentario = mdl.Comentario.objects.create(
+            id=id_coment,
+            conteudo=data['conteudo_comentario'],
+            id_post=validated_data['post'],
+            id_comentario_pai=validated_data['comentario_pai']
+        )
+        return {
+            'id_comentario': novo_comentario,
+            'id_post': validated_data['post'],
+            'id_comentario_respondido': validated_data['comentario_pai'],
+            'curtida': False
+        }
+
+class FollowProfileStrategy(InteractionStrategy):
+    def validate(self, data, user):
+        if mdl.Interacao.objects.filter(
+            id_usuario=data['id_usuario'],
+            id_perfil_seguir=data['id_perfil_seguir']
+        ).exists():
+            return False, "Usuário já segue este perfil"
+        try:
+            perfil = mdl.Perfil.objects.get(id=data['id_perfil_seguir'])
+        except mdl.Perfil.DoesNotExist:
+            return False, "Perfil a seguir não encontrado"
+        return True, {'perfil': perfil}
+
+    def execute(self, data, validated_data):
+        return {
+            'id_perfil_seguir': validated_data['perfil'],
+            'curtida': False
+        }
+
+class InteractionContext:
+    def __init__(self):
+        self._strategies = {
+            'like post': PostLikeStrategy(),
+            'like comentario': CommentLikeStrategy(),
+            'criar comentario': CreateCommentStrategy(),
+            'responder comentario': ReplyCommentStrategy(),
+            'seguir perfil': FollowProfileStrategy()
+        }
+
+    def handle_interaction(self, tipo, data, user):
+        if tipo not in self._strategies:
+            return False, "Tipo de interação inválido"
+        
+        strategy = self._strategies[tipo]
+        is_valid, result = strategy.validate(data, user)
+        if not is_valid:
+            return False, result
+            
+        return True, strategy.execute(data, result)
+
 # {
 #     "tipo": "criar comentario",
-#     "id_usuario": 1,
-#     "id_post": 8,
+#     "id_usuario": 4,
+#     "id_post": 7,
 #     "conteudo_comentario": "Queria ta jogando Valheim D;"
 # }
 # {
 #     "tipo": "responder comentario",
 #     "id_usuario": 2,
-#     "id_post": 1,
-#     "id_comentario_pai": 1,
-#     "conteudo_comentario": "tuudoooo!"
+#     "id_post": 7,
+#     "id_comentario_pai": 8,
+#     "conteudo_comentario": "tbm ;("
 # }
-@csrf_exempt # Decorador perigoso?
+# {
+#     "tipo": "like post",
+#     "id_usuario": 1,
+#     "id_post": 5
+# }
+# {
+#     "tipo": "like comentario",
+#     "id_usuario": 2,
+#     "id_post": 7,
+#     "id_comentario": 8
+# }
+# {
+#     "tipo": "seguir perfil", 
+#     "id_usuario": 1,
+#     "id_perfil_seguir": 3
+# }
+@csrf_exempt
 @api_view(['POST'])
 def create_interaction(request):
     try:
-        # Obter dados do request
         tipo = request.data.get('tipo')
-        
         id_usuario = request.data.get('id_usuario')
-        id_perfil_seguir = request.data.get('id_perfil_seguir')
 
-        id_post = request.data.get('id_post')
-        conteudo_post = request.data.get('conteudo_post')
-        midia = request.data.get('midia')
-
-        curtida = request.data.get('curtida')
-
-        id_comentario = request.data.get('id_comentario')
-        id_comentario_respondido = request.data.get('id_comentario_respondido')
-        id_comentario_pai = request.data.get('id_comentario_pai')
-        conteudo_comentario = request.data.get('conteudo_comentario')
-
-        # Criando e validando id da nova interacao
-        while True:
-            total_interacoes = mdl.Interacao.objects.count()
-            id_interacao = total_interacoes + 1
-            if not mdl.Interacao.objects.filter(id=id_interacao).exists():
-                break
-
-        data = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
-        data = timezone.now()
-
-        # Validar inexistência da interação
-        if tipo == 'like post':
-            if mdl.Interacao.objects.filter(id_usuario=id_usuario, id_post=id_post).exists():
-                return Response({"erro": "Usuário já deu like nesse post"}, status=400)
-            
-        if tipo == 'like comentario':
-            if mdl.Interacao.objects.filter(id_usuario=id_usuario, id_post=id_post, id_comentario=id_comentario, id_comentario_respondido=id_comentario_pai).exists():
-                return Response({"erro": "Usuário já deu like nesse comentário"}, status=400)
-
-        if tipo == 'seguir perfil':
-            if mdl.Interacao.objects.filter(id_usuario=id_usuario, id_perfil_seguir=id_perfil_seguir).exists():
-                return Response({"erro": "Usuário já segue este perfil"}, status=400)
-
-
-
-        # Validar tipo de interação
-        tipos_validos = ['criar post', 'criar comentario', 'like post', 'like comentario', 'responder comentario', 'seguir perfil']
-        if tipo not in tipos_validos:
-            return Response({"erro": f"Tipo de interação inválido. Tipos válidos: {tipos_validos}"}, status=400)
-
-        # Validar existência do usuário
         try:
             usuario = mdl.Usuario.objects.get(id=id_usuario)
         except mdl.Usuario.DoesNotExist:
             return Response({"erro": "Usuário não encontrado"}, status=404)
 
-        # Validar existência do post, se aplicável
-        if id_post:
-            try:
-                post = mdl.Post.objects.get(id=id_post)
-            except mdl.Post.DoesNotExist:
-                id_post = None
-                return Response({"erro": "Post não encontrado"}, status=404)
-        else:
-            post = None
+        interaction_context = InteractionContext()
+        success, result = interaction_context.handle_interaction(tipo, request.data, usuario)
 
+        if not success:
+            return Response({"erro": result}, status=400)
 
+        id_interacao = mdl.Interacao.objects.count() + 1
+        while mdl.Interacao.objects.filter(id=id_interacao).exists():
+            id_interacao += 1
 
-        #
-        # Criar novo comentário se o tipo for 'criar comentario' ou 'responder comentario'
-        #
-        if (tipo == 'criar comentario' or tipo == 'responder comentario') and id_post != None:
-            if not conteudo_comentario:
-                return Response({"erro": "Conteúdo do comentário é obrigatório."}, status=400)
-            
-            comentario_pai = None
-            if tipo == 'responder comentario':
-                if not id_comentario_pai:
-                    return Response({"erro": "ID do comentário pai é obrigatório para responder um comentário."}, status=400)
-                try:
-                    comentario_pai = mdl.Comentario.objects.get(id=id_comentario_pai)
-                except mdl.Comentario.DoesNotExist:
-                    return Response({"erro": "Comentário pai não encontrado"}, status=404)
-            
-            while True:
-                total_coment = mdl.Comentario.objects.count()
-                id_coment = total_coment + 1
-                if not mdl.Comentario.objects.filter(id=id_coment).exists():
-                    break
-
-            novo_comentario = mdl.Comentario(
-                id = id_coment,
-                conteudo=conteudo_comentario,
-                id_post=post,
-                id_comentario_pai=comentario_pai
-            )
-            novo_comentario.save()
-            id_comentario = novo_comentario.id
-
-            if tipo == 'responder comentario':
-                id_comentario_respondido = comentario_pai.id
-
-
-
-        # Validar existência do comentário, se aplicável
-        if id_comentario:
-            try:
-                comentario = mdl.Comentario.objects.get(id=id_comentario)
-            except mdl.Comentario.DoesNotExist:
-                return Response({"erro": "Comentário não encontrado"}, status=404)
-        else:
-            comentario = None
-
-        # Validar existência do comentário respondido, se aplicável
-        if id_comentario_respondido:
-            try:
-                comentario_respondido = mdl.Comentario.objects.get(id=id_comentario_respondido)
-            except mdl.Comentario.DoesNotExist:
-                return Response({"erro": "Comentário respondido não encontrado"}, status=404)
-        else:
-            comentario_respondido = None
-
-        # Validar existência do perfil a seguir, se aplicável
-        if id_perfil_seguir:
-            try:
-                perfil_seguir = mdl.Perfil.objects.get(id=id_perfil_seguir)
-            except mdl.Perfil.DoesNotExist:
-                return Response({"erro": "Perfil a seguir não encontrado"}, status=404)
-        else:
-            perfil_seguir = None
-
-        # Definir curtida como True para tipos 'like post' ou 'like comentario'
-        if tipo == 'like post' or tipo == 'like comentario':
-            curtida = True
-        else:
-            curtida = False
-
-        # Criar nova interação
-        nova_interacao = mdl.Interacao(
+        nova_interacao = mdl.Interacao.objects.create(
             id=id_interacao,
             tipo=tipo,
-            data_interacao=data,
+            data_interacao=timezone.now(),
             id_usuario=usuario,
-            id_post=post,
-            id_comentario=comentario,
-            id_comentario_respondido=comentario_respondido,
-            curtida=curtida,
-            id_perfil_seguir=perfil_seguir
+            **result
         )
-        nova_interacao.save()
 
-        # Serializar e retornar resposta
         serializer = srl.InteracaoSerializer(nova_interacao)
         return Response(serializer.data, status=201)
 
@@ -340,10 +392,36 @@ def get_post_usuario(request, nick):
         # Serializar os posts relacionados
         posts_user = []
         for interacao in interacoes:
-            if (interacao.id_post):  # Certificar que a interação possui um post
-                post = interacao.id_post  # Já é um objeto Post pela relação ForeignKey
-                serializer = srl.PostSerializer(post)
-                posts_user.append(serializer.data)  # Adicionar o JSON do post à lista
+            if interacao.id_post:  # Certificar que a interação possui um post
+                post_obj = interacao.id_post  # Já é um objeto Post pela relação ForeignKey
+                post_serializer = srl.PostSerializer(post_obj)
+                post = post_serializer.data
+                lista_comentarios = []
+                interacoes = mdl.Interacao.objects.filter(id_post=post['id'])
+                quant_curtidas = interacoes.filter(tipo='like post').count()
+                quant_comentarios = interacoes.filter(tipo='criar comentario').count()
+                list_comments = interacoes.filter(tipo='criar comentario').values_list('id_comentario', flat=True)
+
+                for comment in list_comments:
+                    comentario = mdl.Comentario.objects.get(id=comment)
+                    serializer_comentario = srl.ComentarioSerializer(comentario)
+                    lista_comentarios.append(serializer_comentario.data)    
+
+                data_atual = timezone.now()
+                data_post = interacoes.filter(tipo='criar post').values_list('data_interacao', flat=True)[0]
+                time_diference = data_atual - data_post
+                data = time_diference.total_seconds()/3600
+
+
+                posts_user.append({
+                    "id": post['id'],
+                    "conteudo": post['conteudo'],
+                    "midia": post['midia'],
+                    "curtidas": quant_curtidas,
+                    "comentarios": quant_comentarios,
+                    "lista_comentarios": lista_comentarios,
+                    "time": int(data),                
+                }) # Adicionar o JSON do post à lista
         
         return Response(posts_user, status=200)
     except mdl.Usuario.DoesNotExist:
@@ -365,7 +443,35 @@ def get_posts_feed(request, nick):
             posts_amigo = mdl.Interacao.objects.filter(id_usuario=perfil_amigo.id_usuario_perfil, tipo = 'criar post')
             for post in posts_amigo:
                 serializer = srl.PostSerializer(post.id_post)
-                posts_feed.append(serializer.data)
+                posts = serializer.data
+                lista_comentarios = []
+                interacoes = mdl.Interacao.objects.filter(id_post=posts['id'])
+                quant_curtidas = interacoes.filter(tipo='like post').count()
+                quant_comentarios = interacoes.filter(tipo='criar comentario').count()
+                list_comments = interacoes.filter(tipo='criar comentario').values_list('id_comentario', flat=True)
+
+                for comment in list_comments:
+                    comentario = mdl.Comentario.objects.get(id=comment)
+                    serializer_comentario = srl.ComentarioSerializer(comentario)
+                    lista_comentarios.append(serializer_comentario.data)    
+
+                data_atual = timezone.now()
+                data_post = interacoes.filter(tipo='criar post').values_list('data_interacao', flat=True)[0]
+                time_diference = data_atual - data_post
+                data = time_diference.total_seconds()/3600
+
+
+                posts_feed.append({
+                    "id": posts['id'],
+                    "conteudo": posts['conteudo'],
+                    "midia": posts['midia'],
+                    "curtidas": quant_curtidas,
+                    "comentarios": quant_comentarios,
+                    "lista_comentarios": lista_comentarios,
+                    "time": int(data), 
+                    "foto": perfil_amigo.id_usuario_perfil.foto,
+                    "nome": perfil_amigo.id_usuario_perfil.username                
+                })
         
         return Response(posts_feed, status=200)
     except mdl.Usuario.DoesNotExist:
@@ -596,21 +702,82 @@ def combined_feed(request, nick):
             posts_amigo = mdl.Interacao.objects.filter(id_usuario=perfil_amigo.id_usuario_perfil, tipo='criar post')
             for post in posts_amigo:
                 serializer = srl.PostSerializer(post.id_post)
-                posts_feed.append(serializer.data)
+                posts = serializer.data
+                lista_comentarios = []
+                interacoes = mdl.Interacao.objects.filter(id_post=posts['id'])
+                quant_curtidas = interacoes.filter(tipo='like post').count()
+                quant_comentarios = interacoes.filter(tipo='criar comentario').count()
+                list_comments = interacoes.filter(tipo='criar comentario').values_list('id_comentario', flat=True)
+
+                for comment in list_comments:
+                    comentario = mdl.Comentario.objects.get(id=comment)
+                    serializer_comentario = srl.ComentarioSerializer(comentario)
+                    lista_comentarios.append(serializer_comentario.data)    
+
+                data_atual = timezone.now()
+                data_post = interacoes.filter(tipo='criar post').values_list('data_interacao', flat=True)[0]
+                time_diference = data_atual - data_post
+                data = time_diference.total_seconds()/3600
+
+
+                posts_feed.append({
+                    "id": posts['id'],
+                    "conteudo": posts['conteudo'],
+                    "midia": posts['midia'],
+                    "curtidas": quant_curtidas,
+                    "comentarios": quant_comentarios,
+                    "lista_comentarios": lista_comentarios,
+                    "time": int(data), 
+                    "foto": perfil_amigo.id_usuario_perfil.foto,
+                    "nome": perfil_amigo.id_usuario_perfil.username                
+                })
 
         # Obter posts por top tags
         tag_counts = u.count_user_tag_interactions(nick)
+        tag_posts = []
         if isinstance(tag_counts, dict) and "erro" in tag_counts:
             return Response(tag_counts, status=404)
         top_tags = [tag['tag'] for tag in tag_counts['tag_interactions']]
         posts_criados = mdl.Interacao.objects.filter(id_usuario=usuario.id, tipo='criar post').values_list('id_post', flat=True)
         posts_top_tags = mdl.Post.objects.filter(posttag__nome_tag__in=top_tags).exclude(id__in=posts_criados).distinct()
         serializer_top_tags = srl.PostSerializer(posts_top_tags, many=True)
+        for post in posts_top_tags:
+                serializer = srl.PostSerializer(post)
+                posts = serializer.data
+                interacao_criar_post = mdl.Interacao.objects.get(id_post = posts['id'], tipo='criar post')
+                perfil_criador_post = mdl.Perfil.objects.get(id_usuario_perfil=interacao_criar_post.id_usuario)
+                lista_comentarios = []
+                interacoes = mdl.Interacao.objects.filter(id_post=posts['id'])
+                quant_curtidas = interacoes.filter(tipo='like post').count()
+                quant_comentarios = interacoes.filter(tipo='criar comentario').count()
+                list_comments = interacoes.filter(tipo='criar comentario').values_list('id_comentario', flat=True)
 
+                for comment in list_comments:
+                    comentario = mdl.Comentario.objects.get(id=comment)
+                    serializer_comentario = srl.ComentarioSerializer(comentario)
+                    lista_comentarios.append(serializer_comentario.data)    
+
+                data_atual = timezone.now()
+                data_post = interacoes.filter(tipo='criar post').values_list('data_interacao', flat=True)[0]
+                time_diference = data_atual - data_post
+                data = time_diference.total_seconds()/3600
+
+
+                tag_posts.append({
+                    "id": posts['id'],
+                    "conteudo": posts['conteudo'],
+                    "midia": posts['midia'],
+                    "curtidas": quant_curtidas,
+                    "comentarios": quant_comentarios,
+                    "lista_comentarios": lista_comentarios,
+                    "time": int(data), 
+                    "foto": perfil_criador_post.id_usuario_perfil.foto,
+                    "nome": perfil_criador_post.id_usuario_perfil.username                
+                })
         # Combinar os resultados
         combined_results = {
             "feed_posts": posts_feed,
-            "top_tag_posts": serializer_top_tags.data
+            "top_tag_posts": tag_posts
         }
 
         return Response(combined_results, status=200)
