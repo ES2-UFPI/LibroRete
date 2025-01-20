@@ -267,8 +267,9 @@ def get_post_usuario(request, nick):
         posts_user = []
         for interacao in interacoes:
             if interacao.id_post:  # Certificar que a interação possui um post
-                post = interacao.id_post  # Já é um objeto Post pela relação ForeignKey
-                serializer = srl.PostSerializer(post)
+                post_obj = interacao.id_post  # Já é um objeto Post pela relação ForeignKey
+                post_serializer = srl.PostSerializer(post_obj)
+                post = post_serializer.data
                 lista_comentarios = []
                 interacoes = mdl.Interacao.objects.filter(id_post=post['id'])
                 quant_curtidas = interacoes.filter(tipo='like post').count()
@@ -294,8 +295,7 @@ def get_post_usuario(request, nick):
                     "comentarios": quant_comentarios,
                     "lista_comentarios": lista_comentarios,
                     "time": int(data),                
-                })
-                posts_user.append(serializer.data)  # Adicionar o JSON do post à lista
+                }) # Adicionar o JSON do post à lista
         
         return Response(posts_user, status=200)
     except mdl.Usuario.DoesNotExist:
