@@ -51,6 +51,23 @@ const Post = ({
     setIsModalCommentOpen(false)
   }
 
+  function sendToApi(json, type) {
+    axios
+      .post('http://localhost:8000/api/interacoes/', json, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(response => {
+        console.log('Response:', response.data)
+        return true
+      })
+      .catch(error => {
+        console.error(`Erro ao registrar ${type}:`, error)
+        return false
+      })
+  }
+
   const handleLikeClick = e => {
     e.preventDefault()
 
@@ -63,20 +80,10 @@ const Post = ({
         id_post: id,
       }
 
-      axios
-        .post('http://localhost:8000/api/interacoes/', json_like, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        .then(response => {
-          console.log('Response:', response.data)
-          setIsLiked(newLiked)
-          setNumLikes(prev => prev + 1)
-        })
-        .catch(error => {
-          console.error('Erro ao registrar curtida:', error)
-        })
+      if (sendToApi(json_like, 'curtida')) {
+        setIsLiked(newLiked)
+        setNumLikes(prev => prev + 1)
+      }
     }
   }
 
@@ -94,19 +101,9 @@ const Post = ({
       conteudo_comentario: comment,
     }
 
-    axios
-      .post('http://localhost:8000/api/interacoes/', json_comment, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      .then(response => {
-        console.log('Response:', response.data)
-        setNumComments(prev => prev + 1)
-      })
-      .catch(error => {
-        console.error('Erro ao registrar comentário:', error)
-      })
+    if (sendToApi(json_comment, 'comentário')) {
+      setNumComments(prev => prev + 1)
+    }
   }
 
   const handleShareClick = () => {
