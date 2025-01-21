@@ -556,7 +556,7 @@ def get_users_by_user_top_tags(request, nick):
         if isinstance(tag_counts, dict) and "erro" in tag_counts:
             return Response(tag_counts, status=404)
         
-        top_tags = [tag['tag'] for tag in tag_counts['tag_interactions'][:2]]
+        top_tags = [tag['tag'] for tag in tag_counts['tag_interactions']]
         
         usuario_atual = mdl.Usuario.objects.get(username=nick)
 
