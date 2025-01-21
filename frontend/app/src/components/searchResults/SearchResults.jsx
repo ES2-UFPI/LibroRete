@@ -17,9 +17,9 @@ function SearchResults({ books, users, filter, answerReceived }) {
                 books.map((book, index) => (
                   <BookRecommendation
                     key={index}
-                    title={book.title}
-                    author={book.author}
-                    genre={book.genre}
+                    title={book.titulo}
+                    author={book.autor}
+                    genre={book.genero}
                   />
                 ))
               )}
@@ -34,7 +34,7 @@ function SearchResults({ books, users, filter, answerReceived }) {
                   <UserRecommendation
                     key={index}
                     username={user.username}
-                    photo={user.photo}
+                    photo={user.foto}
                   />
                 ))
               )}
