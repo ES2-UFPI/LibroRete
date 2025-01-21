@@ -169,6 +169,8 @@ INSERT IGNORE INTO tags (nome) VALUES
 INSERT IGNORE INTO post_tag (id_post, nome_tag) VALUES
 (1, "#DiaDaLeitura"),
 (1, "#Top"),
+(1, "#Fantasia"),
+(1, "#Ficção"),
 (3, "#GeorgeOrwell"),
 (3, "#DavidArnold"),
 (3, "#A.J.Fikry"),
@@ -177,13 +179,18 @@ INSERT IGNORE INTO post_tag (id_post, nome_tag) VALUES
 (3, "#Distopia"),
 (3, "#Historico"),
 (3, "#Top"),
+(3, "#Ficção"),
 (4, "#Fabula"),
 (4, "#Fantasia"),
 (4, "#PequenoPrincipe"),
+(4, "#Ficção"),
 (5, "#PequenoPrincipe"),
 (5, "#Reflexão"),
+(5, "#Ficção"),
 (7, "#Historico"),
-(8, "#Aprendendo");
+(7, "#Suspense"),
+(8, "#Aprendendo"),
+(8, "#Suspense");
 
 INSERT IGNORE INTO interacao (id, tipo, data_interacao, id_usuario, id_post, id_comentario,id_comentario_respondido, curtida, id_perfil_seguir) VALUES
 (1, "criar post", "2024/12/13 12:13:34", 1, 1, NULL,NULL, FALSE, NULL), -- Usuário 1 criou o post 1
