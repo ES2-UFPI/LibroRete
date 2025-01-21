@@ -62,43 +62,50 @@ def get_user(request, nick):
     return Response(serializer.data)
 
 
+class LivroInfoStrategy(ABC):
+    @abstractmethod
+    def buscar_info(self, isbn):
+        pass
+
+class GoogleBooksInfoStrategy(LivroInfoStrategy):
+    def buscar_info(self, isbn):
+        try:
+            response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}")
+            data = response.json()
+        
+            book = data["items"][0]
+            volume_info = book["volumeInfo"]
+            
+            return {
+                'titulo': volume_info.get("title", "Título não encontrado"),
+                'autor': volume_info.get("authors", []),
+                'data_publicacao': volume_info.get("publishedDate", "Data não encontrada"),
+                'descricao': volume_info.get("description", "Descrição não disponível"),
+                'foto': volume_info.get("imageLinks", "Imagem não encontrado")
+            }
+        except Exception as e:
+            return {'error': str(e)}
+        
+
 @api_view(['GET'])
 def get_user_lists(request, nick):
     try:
         usuario = mdl.Usuario.objects.get(username=nick)
         perfil = mdl.Perfil.objects.get(id_usuario_perfil=usuario.id)
-        
-        # Busca todas as listas do usuário
         listas = mdl.Lista.objects.filter(id_perfil_lista=perfil.id)
-        
+
+        livro_info_strategy = GoogleBooksInfoStrategy()
         
         result = []
         for lista in listas:
-            # Pegar instancias de ListaLivro que possuem lista.id
-            listalivro = mdl.ListaLivro.objects.filter(id_lista=lista.id)
-
-            listalivro = listalivro.values_list('isbn_livro') 
+            listalivro = mdl.ListaLivro.objects.filter(id_lista=lista.id).values_list('isbn_livro')
 
             array_livros_google_info=[]
             lista_livro=[]
             for isbn in listalivro: 
-                response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn[0]}")
-                data = response.json()
-                
-                book = data["items"][0]
-                volume_info = book["volumeInfo"] 
-
-                titulo_api = volume_info.get("title", "Título não encontrado")
-                autores = volume_info.get("authors", [])
-                data_publicacao = volume_info.get("publishedDate", "Data não encontrada")
-                descricao = volume_info.get("description", "Descrição não disponível")
-                foto = volume_info.get("imageLinks", "Imagem não encontrado")
-                
-
-                dicionario = {'titulo': titulo_api, 'autor': autores, 'data_publicacao': data_publicacao, 'descricao': descricao, 'foto': foto}
-                array_livros_google_info.append(dicionario)
-                lista_livro.append([titulo_api])
-
+                livro_info = livro_info_strategy.buscar_info(isbn[0])
+                array_livros_google_info.append(livro_info)
+                lista_livro.append([livro_info['titulo']])
 
             result.append({ 
                 'lista': lista.nome,
@@ -113,7 +120,6 @@ def get_user_lists(request, nick):
         return Response({"message": "Usuário não encontrado"}, status=404)
     except Exception as e:
         return Response({"message": str(e)}, status=500)
-
 
 
 class InteractionStrategy(ABC):
