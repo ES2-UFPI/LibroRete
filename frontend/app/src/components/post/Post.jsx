@@ -15,6 +15,7 @@ import { HiOutlineDotsHorizontal } from 'react-icons/hi'
 const Post = ({
   id,
   user_id,
+  foto,
   liked,
   time,
   num_likes,
@@ -50,14 +51,14 @@ const Post = ({
     setIsModalCommentOpen(false)
   }
 
-  const handleLikeClick = () => {
-    const newLiked = !isLiked
+  const handleLikeClick = e => {
+    e.preventDefault()
 
-    alert(newLiked)
+    const newLiked = !isLiked
 
     if (newLiked) {
       const json_like = {
-        tipo: 'curtir',
+        tipo: 'like post',
         id_usuario: user_id,
         id_post: id,
       }
@@ -87,9 +88,10 @@ const Post = ({
     setComment(prevComments => [...prevComments, comment])
 
     const json_comment = {
-      tipo: 'comment',
+      tipo: 'criar comentario',
       id_usuario: user_id,
       id_post: id,
+      conteudo_comentario: comment,
     }
 
     axios
@@ -137,7 +139,11 @@ const Post = ({
     <div className="Post">
       <div className="header">
         <div className="l-container">
-          <BsPersonCircle size={26} />
+          {foto ? (
+            <img id="user_photo_post" src={foto} alt="Foto de perfil" />
+          ) : (
+            <BsPersonCircle id="user_photo_post" size={26} />
+          )}
           <div className="username-container">
             <p id="user">{username}</p>
             <p id="time">{time}</p>
@@ -177,6 +183,7 @@ const Post = ({
               isOpen={isModalCommentOpen}
               onClose={closeModalComment}
               onSubmitComment={handleSubmitComment}
+              id_post={id}
               comments={comments}
             ></ModalComment>
           </div>

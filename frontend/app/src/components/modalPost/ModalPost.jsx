@@ -62,14 +62,18 @@ const ModalPost = ({ isOpen, onClose, post }) => {
         </div>
         <div className="modal-post-content">
           <Post
+            id={post.id}
+            user_id={1}
+            foto={post.foto}
             time={post.time}
-            liked={post.liked}
-            image={post.image}
-            caption={post.caption}
-            username={post.username}
-            num_likes={post.num_likes}
-            num_shares={post.num_shares}
-            num_comments={post.num_comments}
+            liked={false}
+            image={post.midia}
+            caption={post.conteudo}
+            username={post.nome}
+            num_likes={post.curtidas}
+            num_shares={0}
+            num_comments={post.comentarios}
+            comments={post.lista_comentarios}
           />
         </div>
       </div>

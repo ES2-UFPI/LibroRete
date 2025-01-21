@@ -36,6 +36,12 @@ img {
   gap: 10px;
 }
 
+#user_photo_post {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+
 #user {
   font-weight: bold;
 }
@@ -85,7 +91,7 @@ img {
 .text {
   display: flex;
   flex-direction: row;
-  align-items: start;
+  align-items: center;
   flex-wrap: wrap;
   gap: 10px;
 }

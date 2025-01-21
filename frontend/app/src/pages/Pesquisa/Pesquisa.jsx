@@ -6,20 +6,21 @@ import { React, useState } from 'react'
 import { LuSearch } from 'react-icons/lu'
 
 function Pesquisa() {
-  const [answerReceived, setAnswerReceived] = useState(false)
-  const [selectedFilter, setSelectedFilter] = useState('all')
-  const [searchData, setSearchData] = useState('')
   const [adicFilters, setAdicFilters] = useState({
     genero: '',
     autor: '',
   })
+  const [erro, setError] = useState(null)
   const [userData, setUserData] = useState([])
   const [bookData, setBookData] = useState([])
-  const [erro, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [searchData, setSearchData] = useState('')
+  const [answerReceived, setAnswerReceived] = useState(false)
+  const [selectedFilter, setSelectedFilter] = useState('all')
 
   const fetchUsers = async () => {
     setLoading(true)
+
     try {
       const response = await axios.get(
         `http://localhost:8000/api/buscar-usuarios/?username=${searchData}`
@@ -57,9 +58,11 @@ function Pesquisa() {
 
   const handleSearchBarSubmit = e => {
     e.preventDefault()
+
     setUserData([])
     setBookData([])
     setAnswerReceived(false)
+
     if (searchData.trim() !== '') {
       setAnswerReceived(true)
       setLoading(true)
@@ -74,6 +77,7 @@ function Pesquisa() {
 
   const handleChangeFilter = e => {
     const value = e.target.value
+
     setSelectedFilter(value)
 
     if (value === 'all') {
@@ -82,8 +86,8 @@ function Pesquisa() {
   }
 
   const handleApplyFilters = () => {
-    const genero = document.getElementById('genero').value
     const autor = document.getElementById('autor').value
+    const genero = document.getElementById('genero').value
 
     setAdicFilters({
       genero: genero,

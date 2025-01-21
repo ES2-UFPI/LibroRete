@@ -5,7 +5,13 @@ import Comment from '../../comment/Comment'
 import { IoCloseCircleSharp } from 'react-icons/io5'
 import { IoCloseCircleOutline } from 'react-icons/io5'
 
-const ModalComment = ({ isOpen, onClose, onSubmitComment, comments }) => {
+const ModalComment = ({
+  isOpen,
+  onClose,
+  onSubmitComment,
+  id_post,
+  comments,
+}) => {
   const [formData, setFormData] = useState({
     comment: '',
   })
@@ -42,6 +48,8 @@ const ModalComment = ({ isOpen, onClose, onSubmitComment, comments }) => {
     setIsHovered(false)
   }
 
+  const hasComments = comments && comments.length > 0
+
   if (!isOpen) return null
 
   return (
@@ -77,19 +85,23 @@ const ModalComment = ({ isOpen, onClose, onSubmitComment, comments }) => {
         </div>
         <div className="modal-comment-content">
           <div className="comments-content">
-            {comments.map((comment, index) => (
-              <Comment
-                key={index}
-                id={comment.id}
-                conteudo={comment.conteudo}
-                username={comment.username}
-                foto={comment.foto}
-                id_comentario_pai={comment.id_comentario_pai}
-                id_post={comment.id_post}
-                liked={comment.liked}
-                num_likes={comment.num_likes}
-              />
-            ))}
+            {hasComments ? (
+              comments.map((comment, index) => (
+                <Comment
+                  key={index}
+                  id={comment.id}
+                  conteudo={comment.conteudo}
+                  username={comment.nome}
+                  foto={comment.foto}
+                  id_comentario_pai={comment.id_comentario_pai}
+                  id_post={id_post}
+                  liked={false}
+                  num_likes={comment.curtidas}
+                />
+              ))
+            ) : (
+              <p>Nenhum comentário ainda. Seja o primeiro a comentar!</p>
+            )}
           </div>
           <div className="new-comment-content">
             <h3>Deixe o seu!</h3>
