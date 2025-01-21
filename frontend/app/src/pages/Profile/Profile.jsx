@@ -16,11 +16,6 @@ function Profile() {
   const [erro, setError] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // const data = {
-  //   bio: 'aaaaaaaaaa',
-  //   interesses: 'aaaaaaaaa',
-  // }
-
   useEffect(() => {
     axios
       .get('http://localhost:8000/api/perfis/@eduarda?format=json')
@@ -56,26 +51,30 @@ function Profile() {
     <>
       <div className="ProfileInfo">
         <div className="photo-container">
-          <BsPersonCircle id="photo" size={110} />
+          {data['foto'] ? (
+            <img id="photo" src={data['foto']} alt="Foto de perfil" />
+          ) : (
+            <BsPersonCircle id="photo" size={110} />
+          )}
         </div>
         <div className="details-container">
-          <h2>@eduarda</h2>
+          <h2>{data['username']}</h2>
           <div className="info-numbers">
             <div className="number">
-              <span>0</span>
+              <span>{data['numero_posts']}</span>
               <p>publicações</p>
             </div>
             <div className="number">
-              <span>0</span>
+              <span>{data['numero_seguidores']}</span>
               <p>seguidores</p>
             </div>
             <div className="number">
-              <span>0</span>
+              <span>{data['numero_seguindo']}</span>
               <p>seguindo</p>
             </div>
           </div>
           <div className="info-text">
-            <h3>Name</h3>
+            <h3>{data['nome']}</h3>
             <p>{data['bio']}</p>
             <p>{data['interesses']}</p>
           </div>

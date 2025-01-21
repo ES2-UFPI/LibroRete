@@ -2,16 +2,28 @@ import './ProfilePostItem.css'
 import ModalPost from '../modalPost/ModalPost'
 import { React, useState } from 'react'
 
-const ProfilePostItem = ({ midia, id, conteudo }) => {
+const ProfilePostItem = ({
+  key,
+  id,
+  conteudo,
+  midia,
+  curtidas,
+  comentarios,
+  lista_comentarios,
+  time,
+  foto,
+}) => {
   const post = {
-    time: 'há 1h',
+    id: id,
+    time: time,
     liked: false,
-    image: midia,
-    caption: conteudo,
-    username: 'eduarda',
-    num_likes: 10,
-    num_shares: 11,
-    num_comments: 12,
+    midia: midia,
+    conteudo: conteudo,
+    nome: '@eduarda',
+    curtidas: curtidas,
+    comentarios: comentarios,
+    lista_comentarios: lista_comentarios,
+    foto: foto,
   }
   const [isModalPostOpen, setIsModalPostOpen] = useState(false)
 

@@ -9,6 +9,23 @@ const ProfilePosts = () => {
   const [erro, setError] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  function hoursToText(hours) {
+    if (hours === 0) return 'há menos de 1h'
+
+    if (hours <= 24) {
+      return `há ${hours}} ${hours} === 1 ? 'hora' : 'horas'}`
+    }
+
+    const data = new Date()
+    data.setHours(data.getHours() - hours)
+
+    const dia = String(data.getDate()).padStart(2, '0')
+    const mes = String(data.getMonth() + 1).padStart(2, '0')
+    const ano = data.getFullYear()
+
+    return `${dia}/${mes}/${ano}`
+  }
+
   useEffect(() => {
     axios
       .get('http://localhost:8000/api/posts/@eduarda?format=json')
@@ -32,9 +49,16 @@ const ProfilePosts = () => {
         {data.map((post, index) => (
           <ProfilePostItem
             key={index}
-            midia={post.midia}
             id={post.id}
             conteudo={post.conteudo}
+            midia={post.midia}
+            curtidas={post.curtidas}
+            comentarios={post.comentarios}
+            lista_comentarios={post.lista_comentarios}
+            time={hoursToText(post.time)}
+            foto={
+              'https://png.pngtree.com/png-clipart/20230308/ourlarge/pngtree-cute-cat-sticker-cartoon-kitty-kitten-png-image_6635310.png'
+            }
           />
         ))}
       </div>
