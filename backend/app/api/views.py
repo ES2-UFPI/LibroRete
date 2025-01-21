@@ -133,7 +133,7 @@ class InteractionStrategy(ABC):
 
 class PostLikeStrategy(InteractionStrategy):
     def validate(self, data, user):
-        if mdl.Interacao.objects.filter(id_usuario=data['id_usuario'], id_post=data['id_post']).exists():
+        if mdl.Interacao.objects.filter(tipo='like post', id_usuario=data['id_usuario'], id_post=data['id_post']).exists():
             return False, "Usuário já deu like nesse post"
         try:
             post = mdl.Post.objects.get(id=data['id_post'])
