@@ -14,12 +14,13 @@ from . import funcoes_posts as p
 from django.http import HttpRequest
 import requests
 from abc import ABC, abstractmethod
+from .repositories import UsuarioRepository, PostRepository
 
 @api_view(['GET'])
 def get_by_nick(request, nick):
     #Retorna o perfil do usuário com base no nome de usuário(nickname) 
     try:
-        usuario = mdl.Usuario.objects.get(username=nick)
+        usuario = UsuarioRepository.get_by_username(nick)
     except mdl.Usuario.DoesNotExist:
         return Response({"message": "Usuário não encontrado"}, status=404)
     
@@ -52,14 +53,11 @@ def get_by_nick(request, nick):
 @api_view(['GET'])
 def get_user(request, nick):
     try:
-        usuario = mdl.Usuario.objects.get(username=nick)
+        usuario = UsuarioRepository.get_by_username(nick)
+        serializer = srl.UsuarioSerializer(usuario)
+        return Response(serializer.data)
     except:
         return Response({"message": "Usuário não encontrado"}, status=404)
-
-    usuario = mdl.Usuario.objects.get(username=nick)
-    serializer = srl.UsuarioSerializer(usuario)
-
-    return Response(serializer.data)
 
 
 class LivroInfoStrategy(ABC):
@@ -381,7 +379,7 @@ def search_books(request):
 @api_view(['GET'])
 def get_all_posts(request):
     try:
-        posts = mdl.Post.objects.all()
+        posts = PostRepository.get_all()
         posts_list = []
         serializer = srl.PostSerializer(posts, many=True)
         for post in serializer.data:
@@ -394,7 +392,7 @@ def get_all_posts(request):
 @api_view(['GET'])
 def get_post_usuario(request, nick):
     try:
-        usuario = mdl.Usuario.objects.get(username=nick)
+        usuario = UsuarioRepository.get_by_username(nick)
         
         # Filtrar interações do tipo 'criar post' para o usuário
         interacoes = mdl.Interacao.objects.filter(id_usuario=usuario.id, tipo='criar post')
@@ -425,7 +423,7 @@ def get_post_usuario(request, nick):
 @api_view(['GET'])
 def get_posts_feed(request, nick):
     try:
-        usuario = mdl.Usuario.objects.get(username=nick)
+        usuario = UsuarioRepository.get_by_username(nick)
         
         # Buscar posts dos usuarios seguidos
         seguindo = mdl.Interacao.objects.filter(id_usuario = usuario.id, tipo = 'seguir perfil')
@@ -659,7 +657,7 @@ def get_posts_by_user_top_tags(request, nick):
 def combined_feed(request, nick):
     try:
         # Obter posts do feed
-        usuario = mdl.Usuario.objects.get(username=nick)
+        usuario = UsuarioRepository.get_by_username(nick)
         seguindo = mdl.Interacao.objects.filter(id_usuario=usuario.id, tipo='seguir perfil')
         posts_feed = []
         ids_posts =set()
