@@ -188,8 +188,8 @@ INSERT IGNORE INTO post_tag (id_post, nome_tag) VALUES
 (5, "#Reflexão"),
 (5, "#Ficção"),
 (7, "#Historico"),
-(7, "#Suspense");
-(8, "#Aprendendo");
+(7, "#Suspense"),
+(8, "#Aprendendo"),
 (8, "#Suspense");
 
 INSERT IGNORE INTO interacao (id, tipo, data_interacao, id_usuario, id_post, id_comentario,id_comentario_respondido, curtida, id_perfil_seguir) VALUES
