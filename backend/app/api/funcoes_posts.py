@@ -1,10 +1,11 @@
 from . import serializers as srl
 from . import models as mdl
 from django.utils import timezone
+from .repositories import UsuarioRepository, PostRepository
 
 def get_post_interacoes(id_post):
     try:
-        post = mdl.Post.objects.get(id=id_post)
+        post = PostRepository.get_by_id(id_post)
         interacoes = mdl.Interacao.objects.filter(id_post=post.id)
         lista_comentarios = []
         #interacoes = mdl.Interacao.objects.filter(id_post=post['id'])
